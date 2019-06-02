@@ -1,1 +1,1 @@
-{"states":[{"value":"lol","id":1},{"value":"kek","id":2},{"value":"cheburek","id":3}],"transitions":[{"id":1,"name":"run","initialStateId":1,"finalStateId":2},{"id":2,"name":"sleep","initialStateId":2,"finalStateId":3}]}
+{"states":[{"id":1,"value":"lol"},{"id":2,"value":"kek"},{"id":3,"value":"cheburek"}],"transitions":[{"finalStateId":2,"id":0,"initialStateId":1,"name":"run"},{"finalStateId":3,"id":1,"initialStateId":2,"name":"sleep"}]}

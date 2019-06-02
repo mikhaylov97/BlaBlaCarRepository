@@ -27,6 +27,8 @@ private slots:
 
     void on_deleteTransitionPushButton_clicked();
 
+    void on_checkStatesReachabilityPushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

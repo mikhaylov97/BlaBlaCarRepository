@@ -19,14 +19,14 @@ namespace StateMachineBlaBlaCar
     {
     private:
         State<T> * iterator;
-        StateMachine<T, Alloc> & stateMachine;
+        StateMachine<T, Alloc> * stateMachine;
 
         std::vector<int> visited_states_indexes;
 
         State<T> * deepFirstSearch(State<T>*);
 
     public:
-        Iterator(StateMachine<T, Alloc> & stateMachine, State<T> * iterator) : iterator(iterator), stateMachine(stateMachine)
+        Iterator(StateMachine<T, Alloc> * stateMachine, State<T> * iterator) : iterator(iterator), stateMachine(stateMachine)
         {
             if (iterator != nullptr)
                 visited_states_indexes.push_back(iterator->get_id());
@@ -80,12 +80,12 @@ namespace StateMachineBlaBlaCar
     {
         // find all next transitions
         std::vector<Transition<T>> next_transitions;
-        auto i = stateMachine.get_transitions().begin();
+        auto i = stateMachine->get_transitions_vector()->begin();
         while ((i = std::find_if(
                     i,
-                    stateMachine.get_transitions().end(),
+                    stateMachine->get_transitions_vector()->end(),
                     [&initial_state](Transition<T> t) { return t.get_initial_state().get_id() == initial_state->get_id(); }
-        )) != stateMachine.get_transitions().end())
+        )) != stateMachine->get_transitions_vector()->end())
         {
             if (std::find(
                         visited_states_indexes.begin(),
@@ -101,11 +101,11 @@ namespace StateMachineBlaBlaCar
         {
             // go back
             std::vector<Transition<T>> back_transitions;
-            auto i = stateMachine.get_transitions().begin();
+            auto i = stateMachine->get_transitions_vector()->begin();
             while ((i = std::find_if(
                         i,
-                        stateMachine.get_transitions().end(),
-                [&initial_state](Transition<T> t) { return t.FinalState().Id() == initial_state->Id(); })) != stateMachine.get_transitions().end())
+                        stateMachine->get_transitions_vector()->end(),
+                [&initial_state](Transition<T> t) { return t.get_final_state().get_id() == initial_state->get_id(); })) != stateMachine->get_transitions_vector()->end())
             {
                 back_transitions.push_back((*i));
                 i++;
@@ -117,7 +117,7 @@ namespace StateMachineBlaBlaCar
             auto back_transition = std::min_element(back_transitions.begin(), back_transitions.end(),
                 [](Transition<T> x, Transition<T> y) {  return x.get_initial_state().get_id() < y.get_initial_state().get_id(); });
 
-            auto prev = std::find_if(stateMachine.get_states().begin(), stateMachine.get_states().end(),
+            auto prev = std::find_if(stateMachine->get_states_vector()->begin(), stateMachine->get_states_vector()->end(),
                 [&back_transition](const State<T> & state) { return state.get_id() == (*back_transition).get_initial_state().get_id(); });
 
             return deepFirstSearch(&(*prev));
@@ -128,7 +128,7 @@ namespace StateMachineBlaBlaCar
             [](Transition<T> x, Transition<T> y) {  return x.get_final_state().get_id() < y.get_final_state().get_id(); });
 
         // find next state
-        auto next = std::find_if(stateMachine.get_states().begin(), stateMachine.get_states().end(),
+        auto next = std::find_if(stateMachine->get_states_vector()->begin(), stateMachine->get_states_vector()->end(),
             [&next_transition](const State<T> & state) { return state.get_id() == (*next_transition).get_final_state().get_id(); });
 
         return &(*next);

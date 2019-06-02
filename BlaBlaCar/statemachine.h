@@ -12,7 +12,7 @@
 #include "iterator.h"
 #include "exceptions.h"
 #include "serializer.h"
-
+#include "allocator.h"
 
 namespace StateMachineBlaBlaCar
 {
@@ -21,7 +21,7 @@ namespace StateMachineBlaBlaCar
     class Iterator;
 
 
-    template <typename T, typename Alloc = std::allocator<T> >
+    template <typename T, typename Alloc = Allocator<T>>
     class StateMachine
     {
     private:
@@ -351,14 +351,14 @@ namespace StateMachineBlaBlaCar
             return transitions.data();
         }
 
-        std::vector<State<T>, Alloc> & get_states_vector()
+        std::vector<State<T>, Alloc> * get_states_vector()
         {
-            return states;
+            return &states;
         }
 
-        std::vector<Transition<T>, Alloc> & get_transitions_vector()
+        std::vector<Transition<T>, Alloc> * get_transitions_vector()
         {
-            return transitions;
+            return &transitions;
         }
 
         int get_states_number()
@@ -394,12 +394,12 @@ namespace StateMachineBlaBlaCar
                         [](const State<T> & first, const State<T> & second) {  return first.get_id() < second.get_id(); }
             );
 
-            return Iterator<T, Alloc>(*this, &(*first_state));
+            return Iterator<T, Alloc>(&(*this), &(*first_state));
         }
 
         Iterator<T, Alloc> end()
         {
-            return Iterator<T, Alloc>(*this, nullptr);
+            return Iterator<T, Alloc>(&(*this), nullptr);
         }
 
         std::string to_json()

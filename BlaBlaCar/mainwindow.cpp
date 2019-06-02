@@ -4,6 +4,7 @@
 
 #include "serializer.h"
 #include "statemachine.h"
+#include "algorithm.h"
 
 using namespace StateMachineBlaBlaCar;
 
@@ -19,14 +20,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 //    ui->graphicsView->setScene(graph->draw());
 
-    for(auto stateIterator = stateMachine->get_states_vector().begin(); stateIterator != stateMachine->get_states_vector().end(); ++stateIterator)
+    for(auto stateIterator = stateMachine->get_states_vector()->begin(); stateIterator != stateMachine->get_states_vector()->end(); ++stateIterator)
     {
         ui->deleteStateComboBox->addItem(QString::fromStdString(stateIterator->get_value()));
         ui->addTransitionFromComboBox->addItem(QString::fromStdString(stateIterator->get_value()));
         ui->addTransitionToComboBox->addItem(QString::fromStdString(stateIterator->get_value()));
     }
 
-    for(auto transitionIterator = stateMachine->get_transitions_vector().begin(); transitionIterator != stateMachine->get_transitions_vector().end(); ++transitionIterator)
+    for(auto transitionIterator = stateMachine->get_transitions_vector()->begin(); transitionIterator != stateMachine->get_transitions_vector()->end(); ++transitionIterator)
     {
         ui->deleteTransitionFromComboBox->addItem(QString::fromStdString(transitionIterator->get_initial_state().get_value()));
         ui->deleteTransitionToComboBox->addItem(QString::fromStdString(transitionIterator->get_final_state().get_value()));
@@ -103,4 +104,26 @@ void MainWindow::on_deleteTransitionPushButton_clicked()
     stateMachine->delete_transition(initial_state.get_id(), final_state.get_id());
 
     QMessageBox::information(0, "INFO", "Transition deleted!");
+}
+
+void MainWindow::on_checkStatesReachabilityPushButton_clicked()
+{
+    auto unreachable_states = get_unreachable_states(*stateMachine);
+    std::vector<std::string> states;
+    QString states_str;
+    for (auto state = unreachable_states.begin(); state != unreachable_states.end(); ++state)
+    {
+        states.push_back(state->get_value());
+        if (state == unreachable_states.end()) {
+            states_str.append(QString::fromStdString(state->get_value()));
+        }
+        states_str.append(QString::fromStdString(state->get_value())).append(", ");
+    }
+
+    if (states.size() == 0) {
+        QMessageBox::information(0, "INFO", "All states are reachable!");
+    } else {
+        QMessageBox::information(0, "INFO", "States with following names are not reachable: " + states_str);
+
+    }
 }

@@ -29,7 +29,7 @@
     <property name="currentIndex">
      <number>1</number>
     </property>
-    <widget class="QWidget" name="userTab" native="true">
+    <widget class="QWidget" name="userTab">
      <attribute name="title">
       <string>User</string>
      </attribute>
@@ -349,7 +349,7 @@
        <string>Check states availability:</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="checkStatesReachabilityPushButton">
       <property name="geometry">
        <rect>
         <x>750</x>
