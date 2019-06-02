@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "statemachine.h"
+#include "allocator.h"
 
 namespace Ui {
 class MainWindow;
@@ -14,6 +16,16 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    StateMachineBlaBlaCar::StateMachine<std::string, StateMachineBlaBlaCar::Allocator<std::string>> * stateMachine;
+
+private slots:
+    void on_addStatePushButton_clicked();
+
+    void on_deleteStatePushButton_clicked();
+
+    void on_addTransitionPushButton_clicked();
+
+    void on_deleteTransitionPushButton_clicked();
 
 private:
     Ui::MainWindow *ui;

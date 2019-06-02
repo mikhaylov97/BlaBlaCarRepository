@@ -29,7 +29,15 @@ SOURCES += \
         mainwindow.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    exceptions.h \
+    state.h \
+    transition.h \
+    allocator.h \
+    iterator.h \
+    statemachine.h \
+    algorithm.h \
+    serializer.h
 
 FORMS += \
         mainwindow.ui
@@ -38,3 +46,10 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    graph.json
+
+
+RESOURCES += \
+    graph.json
