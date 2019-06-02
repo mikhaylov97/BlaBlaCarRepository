@@ -13,6 +13,7 @@
 #include "exceptions.h"
 #include "serializer.h"
 #include "allocator.h"
+#include "car.h"
 
 namespace StateMachineBlaBlaCar
 {
@@ -29,6 +30,8 @@ namespace StateMachineBlaBlaCar
         static int _counter;
         std::vector<State<T>, Alloc> states;
         std::vector<Transition<T>, Alloc> transitions;
+        std::vector<Car<void>, Alloc> cars;
+        std::vector<std::string, Alloc> passengers;
 
         template <typename T1, typename Alloc1>
         friend class Iterator;
@@ -218,7 +221,7 @@ namespace StateMachineBlaBlaCar
             states.push_back(state);
 
             AssertStateExists(state.get_id());
-        }
+        }        
 
         void delete_state(std::string state_name)
         {
@@ -257,6 +260,16 @@ namespace StateMachineBlaBlaCar
 
             AssertStateNotExists(state_id);
             AssertIllegalTransitions();
+        }
+
+        void add_passenger_login(std::string login)
+        {
+            passengers.push_back(login);
+        }
+
+        void add_car(Car<void> car)
+        {
+            cars.push_back(car);
         }
 
         void add_transition(Transition<T> transition) throw(StateAlreadyExistsException)
@@ -349,6 +362,16 @@ namespace StateMachineBlaBlaCar
         Transition<T> * get_transitions()
         {
             return transitions.data();
+        }
+
+        std::vector<Car<void>> * get_cars_vector()
+        {
+            return &cars;
+        }
+
+        std::vector<std::string> * get_all_logins()
+        {
+            return &passengers;
         }
 
         std::vector<State<T>, Alloc> * get_states_vector()
@@ -449,7 +472,17 @@ namespace StateMachineBlaBlaCar
             for(auto stateIterator = jStates.begin(); stateIterator != jStates.end(); ++stateIterator)
             {
                 QJsonObject obj = stateIterator->toObject();
-                add_state(State<T>(obj["value"].toString().toStdString(), obj["id"].toInt()));
+                State<T> new_state = State<T>(obj["value"].toString().toStdString(), obj["id"].toInt());
+                QJsonArray jChildStates = obj["states"].toArray();
+                if (jChildStates.size() != 0)
+                {
+                    for(auto childStateIterator = jChildStates.begin(); childStateIterator != jChildStates.end(); ++childStateIterator)
+                    {
+                        QJsonObject child_state_obj = childStateIterator->toObject();
+                        new_state.add_state(State<T>(child_state_obj["value"].toString().toStdString(), child_state_obj["id"].toInt()));
+                    }
+                }
+                add_state(new_state);
             }
 
             QJsonArray jTransitions = json["transitions"].toArray();
@@ -457,6 +490,31 @@ namespace StateMachineBlaBlaCar
             {
                 QJsonObject obj = transitionIterator->toObject();
                 add_transition(obj["initialStateId"].toInt(), obj["finalStateId"].toInt(), obj["name"].toString().toStdString(), false);
+            }
+
+            QJsonArray jCars = json["cars"].toArray();
+            for(auto carIterator = jCars.begin(); carIterator != jCars.end(); ++carIterator)
+            {
+                QJsonObject obj = carIterator->toObject();
+                int id = obj["id"].toInt();
+                int active_state_id = obj["activeStateId"].toInt();
+                QJsonArray jCarPassengers = obj["passengers"].toArray();
+                std::vector<Passenger> car_passengers;
+                for(auto carPassengerIterator = jCarPassengers.begin(); carPassengerIterator != jCarPassengers.end(); ++carPassengerIterator)
+                {
+                    std::string passenger = carPassengerIterator->toString().toStdString();
+                    QJsonArray jPassengers = json["passengers"].toArray();
+                    auto passenger_obj = std::find_if(jPassengers.begin(),
+                                 jPassengers.end(),
+                                 [&passenger](const QJsonValueRef & ref){return ref.toObject()["login"].toString().toStdString().compare(passenger) == 0;}
+                    );
+                    if (passenger_obj != jPassengers.end())
+                    {
+                        add_passenger_login(passenger);
+                        car_passengers.push_back(Passenger(passenger, (*passenger_obj).toObject()["activeStateId"].toInt()));
+                    }
+                }
+                add_car(Car<void>(id,active_state_id,car_passengers));
             }
         }
 

@@ -37,7 +37,10 @@ HEADERS += \
     iterator.h \
     statemachine.h \
     algorithm.h \
-    serializer.h
+    serializer.h \
+    car.h \
+    passenger.h
+
 
 FORMS += \
         mainwindow.ui

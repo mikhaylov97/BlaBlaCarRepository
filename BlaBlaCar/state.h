@@ -2,6 +2,8 @@
 #define STATE_H
 #pragma once
 
+#include <vector>;
+
 namespace StateMachineBlaBlaCar
 {
     template <typename T>
@@ -11,11 +13,12 @@ namespace StateMachineBlaBlaCar
         T _value;
         int _id;
         static int _counter;
+        std::vector<State<T>> _states;
 
     public:
         State()
         {
-            _id = _counter++;
+            _id = _counter;
         }
 
         State(const T& value) : _value(value)
@@ -27,6 +30,9 @@ namespace StateMachineBlaBlaCar
         {
             _value = state.get_value();
             _id = state.get_id();
+            _states = state._states;
+            if (state.get_id() >= _counter)
+                _counter = state.get_id() + 1;
         }
 
         State(const T& value, int id): _value(value), _id(id)
@@ -66,6 +72,16 @@ namespace StateMachineBlaBlaCar
         void set_id(int id)
         {
             this->_id = id;
+        }
+
+        std::vector<State<T>> * get_states()
+        {
+            return &(this->_states);
+        }
+
+        void add_state(State<T> state)
+        {
+            this->_states.push_back(state);
         }
 
     };
