@@ -15,6 +15,8 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
+    void fill_add_transitions_for_substates_by_default();
+    void fill_delete_transitions_for_substates_by_default();
     ~MainWindow();
     StateMachineBlaBlaCar::StateMachine<std::string, StateMachineBlaBlaCar::Allocator<std::string>> * stateMachine;
 
@@ -28,6 +30,16 @@ private slots:
     void on_deleteTransitionPushButton_clicked();
 
     void on_checkStatesReachabilityPushButton_clicked();
+
+    void on_addStateCarSpecificPushButton_clicked();
+
+    void on_deleteStateCarSpecificStateComboBox_currentTextChanged(const QString &arg1);
+
+    void on_deleteStateCarSpecificPushButton_clicked();
+
+    void on_addTransitionCarSpecificPushButton_clicked();
+
+    void on_deleteTransitionCarSpecificPushButton_clicked();
 
 private:
     Ui::MainWindow *ui;

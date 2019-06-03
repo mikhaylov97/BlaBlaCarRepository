@@ -30,8 +30,8 @@ namespace StateMachineBlaBlaCar
         static int _counter;
         std::vector<State<T>, Alloc> states;
         std::vector<Transition<T>, Alloc> transitions;
-        std::vector<Car<void>, Alloc> cars;
-        std::vector<std::string, Alloc> passengers;
+        std::vector<Car<void>> cars;
+        std::vector<std::string> passengers;
 
         template <typename T1, typename Alloc1>
         friend class Iterator;
@@ -214,6 +214,72 @@ namespace StateMachineBlaBlaCar
             return *state;
         }
 
+        State<T> & find_substate_by_name(std::string name, int superstate_id)
+        {
+            auto state = std::find_if(
+                        states.begin(),
+                        states.end(),
+                        [&superstate_id](const State<T> & state) { return state.get_id() == superstate_id; }
+            );
+
+            std::vector<State<T>> * substates = (*state).get_states();
+            auto substate = std::find_if(
+                        substates->begin(),
+                        substates->end(),
+                        [&name](const State<T> & state) { return state.get_value().compare(name) == 0; }
+            );
+            return *substate;
+        }
+
+        State<T> & find_state_by_id(int state_id)
+        {
+            auto state = std::find_if(
+                        states.begin(),
+                        states.end(),
+                        [&state_id](const State<T> & state) { return state.get_id() == state_id; }
+            );
+            return *state;
+        }
+
+        std::vector<Transition<T>> find_all_transitions_for_superstate(State<T> superstate)
+        {
+            std::vector<State<T>> * substates = superstate.get_states();
+            std::vector<Transition<T>> matches;
+            for(auto substateIterator = substates->begin(); substateIterator != substates->end(); ++substateIterator)
+            {
+                State<T> cur_substate = *substateIterator;
+                auto i = transitions.begin(), end = transitions.end();
+                while (i != end)
+                {
+                    i = std::find_if(i, end, [&cur_substate](Transition<T> & t){return cur_substate.get_id() == t.get_initial_state().get_id();});
+                  if (i != end)
+                  {
+                    matches.push_back((*i));
+                    i++;
+                  }
+                }
+            }
+
+            return matches;
+        }
+
+        std::vector<State<T>> get_reachable_states_from_current(State<T> state)
+        {
+            std::vector<State<T>> matches;
+            auto i = transitions.begin(), end = transitions.end();
+            while (i != end)
+            {
+                i = std::find_if(i, end, [&state](Transition<T> & t){return state.get_id() == t.get_initial_state().get_id();});
+              if (i != end)
+              {
+                matches.push_back((*i).get_final_state());
+                i++;
+              }
+            }
+
+            return matches;
+        }
+
         void add_state(State<T> state) throw(StateAlreadyExistsException)
         {
             AssertStateNotExistsExc(state.get_id());
@@ -221,7 +287,54 @@ namespace StateMachineBlaBlaCar
             states.push_back(state);
 
             AssertStateExists(state.get_id());
-        }        
+        }
+
+        void add_substate(State<T> substate, int state_id)
+        {
+            auto state = std::find_if(states.begin(),
+                         states.end(),
+                         [&state_id](const State<T> & state){return state.get_id() == state_id;}
+            );
+            if (state != states.end())
+            {
+                (*state).add_state(substate);
+            } else {
+                //throw StateNotFoundException();
+            }
+        }
+
+        void delete_substate(int superstate_id, int substate_id)
+        {
+            AssertStateExistsExc(superstate_id);
+            auto state = std::find_if(
+                        states.begin(),
+                        states.end(),
+                        [&superstate_id](const State<T> & state) { return state.get_id() == superstate_id; }
+            );
+
+            std::vector<State<T>> * substates = (*state).get_states();
+
+            substates->erase(
+                std::remove_if(
+                    substates->begin(),
+                    substates->end(),
+                    [&substate_id](State<T> state) { return state.get_id() == substate_id; }
+                ),
+                substates->end()
+            );
+
+            transitions.erase(
+                std::remove_if(
+                    transitions.begin(),
+                    transitions.end(),
+                    [&substate_id](Transition<T> transition) { return transition.get_initial_state().get_id() == substate_id || transition.get_final_state().get_id() == substate_id; }
+                ),
+                transitions.end()
+            );
+
+            AssertStateExistsExc(superstate_id);
+            AssertIllegalTransitions();
+        }
 
         void delete_state(std::string state_name)
         {
@@ -279,6 +392,36 @@ namespace StateMachineBlaBlaCar
             transitions.push_back(transition);
 
             AssertTransitionExists(transition.get_id());
+        }
+
+        void add_transition_for_substates(int superstate_id, int first_state_id, int second_state_id, std::string name, bool one_way)
+        {
+            auto stateIt = std::find_if(
+                        states.begin(),
+                        states.end(),
+                        [&superstate_id](const State<T> & state) { return state.get_id() == superstate_id;}
+            );
+            State<T> superstate = *stateIt;
+            std::vector<State<T>> * substates = superstate.get_states();
+            //add assert
+            auto initial_state = std::find_if(
+                        substates->begin(),
+                        substates->end(),
+                        [&first_state_id](const State<T> & state) { return state.get_id() == first_state_id; }
+            );
+            auto final_state = std::find_if(
+                        substates->begin(),
+                        substates->end(),
+                        [&second_state_id](const State<T> & state) { return state.get_id() == second_state_id; }
+            );
+            if (initial_state == substates->end() || final_state == substates->end())
+            {
+                throw StateNotFoundException("0");
+            }
+            Transition<T> * transition = new Transition<T>(name, *initial_state, *final_state, one_way);
+            transitions.push_back(*transition);
+
+            //add assert
         }
 
         void add_transition(int first_state_id, int second_state_id, std::string name, bool one_way)
