@@ -436,6 +436,17 @@ namespace StateMachineBlaBlaCar
                 obj["value"] = QString::fromStdString(stateIterator->get_value());
         //        obj["pos_x"] = std::trunc(iter->get_pos_x() * 100) / 100;
         //        obj["pos_y"] = std::trunc(iter->get_pos_y() * 100) / 100;
+                if (stateIterator->get_states()->size() > 0) {
+                    QJsonArray jChildStates;
+                    for (auto childStateIterator = stateIterator->get_states()->begin(); childStateIterator != stateIterator->get_states()->end(); ++childStateIterator)
+                    {
+                        QJsonObject childStateObj;
+                        childStateObj["id"] = childStateIterator->get_id();
+                        childStateObj["value"] = QString::fromStdString(childStateIterator->get_value());
+                        jChildStates.push_back(childStateObj);
+                    }
+                    obj["states"] = jChildStates;
+                }
                 jStates.push_back(obj);
             }
 
@@ -452,8 +463,33 @@ namespace StateMachineBlaBlaCar
         //        obj["pos_y"] = std::trunc(iter->get_pos_y() * 100) / 100;
                 jTransitions.push_back(obj);
             }
+
+            QJsonArray jCars;
+            QJsonArray jPassengers;
+            for (auto carIterator = cars.begin(); carIterator != cars.end(); ++carIterator)
+            {
+                QJsonObject carObj;
+                carObj["id"] = carIterator->get_id();
+                carObj["activeStateId"] = carIterator->get_state_id();
+                QJsonArray passengerLogins;
+                for (auto passengerIterator = carIterator->get_passengers()->begin(); passengerIterator != carIterator->get_passengers()->end(); ++passengerIterator)
+                {
+                    std::string login = passengerIterator->get_login();
+                    int passenger_state_id = passengerIterator->get_state_id();
+                    passengerLogins.push_back(QString::fromStdString(login));
+
+                    QJsonObject passengerObj;
+                    passengerObj["login"] = QString::fromStdString(login);
+                    passengerObj["activeStateId"] = passenger_state_id;
+                    jPassengers.push_back(passengerObj);
+                }
+                carObj["passengers"] = passengerLogins;
+                jCars.push_back(carObj);
+            }
             json["states"] = jStates;
             json["transitions"] = jTransitions;
+            json["passengers"] = jPassengers;
+            json["cars"] = jCars;
 
             QJsonDocument json_doc(json);
             QString json_string = json_doc.toJson().simplified();
