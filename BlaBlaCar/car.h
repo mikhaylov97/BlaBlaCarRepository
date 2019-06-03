@@ -14,6 +14,8 @@ namespace StateMachineBlaBlaCar
         int _id;
         int _state;
         std::vector<Passenger> _passengers;
+        std::string _from;
+        std::string _to;
         static int _counter;
 
     public:
@@ -22,11 +24,13 @@ namespace StateMachineBlaBlaCar
             this->_id = _counter++;
         }
 
-        Car(int id, int state, std::vector<Passenger> passengers)
+        Car(int id, int state, std::vector<Passenger> passengers, std::string from, std::string to)
         {
             this->_id = id;
             this->_state = state;
             this->_passengers = passengers;
+            this->_from = from;
+            this->_to = to;
         }
 
         bool operator==(const Car & c){
@@ -65,6 +69,26 @@ namespace StateMachineBlaBlaCar
         std::vector<Passenger> * get_passengers()
         {
             return &(this->_passengers);
+        }
+
+        std::string get_from()
+        {
+            return this->_from;
+        }
+
+        void set_from(std::string from)
+        {
+            this->_from = from;
+        }
+
+        std::string get_to()
+        {
+            return this->_to;
+        }
+
+        void set_to(std::string to)
+        {
+            this->_to = to;
         }
 
     };

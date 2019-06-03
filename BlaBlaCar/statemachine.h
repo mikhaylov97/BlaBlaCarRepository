@@ -471,6 +471,8 @@ namespace StateMachineBlaBlaCar
                 QJsonObject carObj;
                 carObj["id"] = carIterator->get_id();
                 carObj["activeStateId"] = carIterator->get_state_id();
+                carObj["from"] = QString::fromStdString(carIterator->get_from());
+                carObj["to"] = QString::fromStdString(carIterator->get_to());
                 QJsonArray passengerLogins;
                 for (auto passengerIterator = carIterator->get_passengers()->begin(); passengerIterator != carIterator->get_passengers()->end(); ++passengerIterator)
                 {
@@ -534,6 +536,8 @@ namespace StateMachineBlaBlaCar
                 QJsonObject obj = carIterator->toObject();
                 int id = obj["id"].toInt();
                 int active_state_id = obj["activeStateId"].toInt();
+                std::string car_from = obj["from"].toString().toStdString();
+                std::string car_to = obj["to"].toString().toStdString();
                 QJsonArray jCarPassengers = obj["passengers"].toArray();
                 std::vector<Passenger> car_passengers;
                 for(auto carPassengerIterator = jCarPassengers.begin(); carPassengerIterator != jCarPassengers.end(); ++carPassengerIterator)
@@ -550,7 +554,7 @@ namespace StateMachineBlaBlaCar
                         car_passengers.push_back(Passenger(passenger, (*passenger_obj).toObject()["activeStateId"].toInt()));
                     }
                 }
-                add_car(Car<void>(id,active_state_id,car_passengers));
+                add_car(Car<void>(id,active_state_id,car_passengers,car_from,car_to));
             }
         }
 
