@@ -23,6 +23,8 @@ public:
     void fill_add_transitions_for_substates();
     void fill_add_transitions_for_substates(QString state_name);
     void fill_delete_transitions_for_substates(QString state_name);
+    void fill_change_passenger_state_for_substates();
+    void fill_car_reachable_states();
     ~MainWindow();
     StateMachineBlaBlaCar::StateMachine<std::string, StateMachineBlaBlaCar::Allocator<std::string>> * stateMachine;
 
@@ -58,6 +60,8 @@ private slots:
     void on_deletePassengerCarSpecificPushButton_clicked();
 
     void on_addNewPassengerCarSpecificPushButton_clicked();
+
+    void on_changeCarActiveStatePushButton_clicked();
 
 private:
     Ui::MainWindow *ui;

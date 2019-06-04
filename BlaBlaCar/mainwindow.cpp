@@ -59,11 +59,6 @@ MainWindow::MainWindow(QWidget *parent) :
         if (carIterator == stateMachine->get_cars_vector()->begin())
         {
             State<std::string> state = stateMachine->find_state_by_id(carIterator->get_state_id());
-            if (state.get_id() != 3) {
-                ui->changePassengerStateLoginComboBox->setEnabled(false);
-                ui->changePassengerStateStateComboBox->setEnabled(false);
-                ui->changePassengerStatePushButton->setEnabled(false);
-            }
             ui->changeCarActiveStateComboBox->addItem(QString::fromStdString(state.get_value()));
             std::vector<State<std::string>> reachable_states = stateMachine->get_reachable_states_from_current(state);
             for(auto rsIterator = reachable_states.begin(); rsIterator != reachable_states.end(); ++rsIterator)
@@ -77,6 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
     fill_delete_transitions_for_substates();
     fill_free_passengers_for_substates();
     fill_car_passengers_for_substates();
+    fill_change_passenger_state_for_substates();
     //ui->setupUi(this);
 }
 
@@ -798,5 +794,97 @@ void MainWindow::on_addNewPassengerCarSpecificPushButton_clicked()
             fill_car_passengers_for_substates();
             fill_free_passengers_for_substates();
         }
+    }
+}
+
+void MainWindow::fill_change_passenger_state_for_substates()
+{
+    ui->changePassengerStateLoginComboBox->clear();
+    ui->changePassengerStateStateComboBox->clear();
+
+    QString car_active_state = ui->changeCarActiveStateComboBox->currentText();
+    State<std::string> car_active_state_obj = stateMachine->find_state_by_name(car_active_state.toStdString());
+    if (car_active_state_obj.get_states()->size() != 0)
+    {
+        std::vector<Passenger> * passengers = stateMachine->find_car_passengers(ui->chooseCarComboBox->currentIndex() + 1);
+        for(auto passengerIterator = passengers->begin(); passengerIterator != passengers->end(); ++passengerIterator)
+        {
+            ui->changePassengerStateLoginComboBox->addItem(QString::fromStdString(passengerIterator->get_login()));
+            if (ui->changePassengerStateStateComboBox->count() == 0)
+            {
+                State<std::string> passenger_active_state = stateMachine->find_substate_by_id(car_active_state_obj.get_id(), passengerIterator->get_state_id());
+                for(auto substatesIterator = car_active_state_obj.get_states()->begin(); substatesIterator != car_active_state_obj.get_states()->end(); ++substatesIterator)
+                {
+                    ui->changePassengerStateStateComboBox->addItem(QString::fromStdString(substatesIterator->get_value()));
+                }
+                ui->changePassengerStateStateComboBox->setCurrentText(QString::fromStdString(passenger_active_state.get_value()));
+            }
+        }
+
+        if (ui->changePassengerStateLoginComboBox->count() > 0)
+        {
+            ui->changePassengerStateLoginComboBox->setEnabled(true);
+            ui->changePassengerStateStateComboBox->setEnabled(true);
+            ui->changePassengerStatePushButton->setEnabled(true);
+        } else {
+            ui->changePassengerStateLoginComboBox->setEnabled(false);
+            ui->changePassengerStateStateComboBox->setEnabled(false);
+            ui->changePassengerStatePushButton->setEnabled(false);
+        }
+    } else {
+        ui->changePassengerStateLoginComboBox->setEnabled(false);
+        ui->changePassengerStateStateComboBox->setEnabled(false);
+        ui->changePassengerStatePushButton->setEnabled(false);
+    }
+}
+
+void MainWindow::on_changeCarActiveStatePushButton_clicked()
+{
+    Car<void> car = stateMachine->find_car_by_id(ui->chooseCarComboBox->currentIndex() + 1);
+    int car_old_state_id = car.get_state_id();
+    QString car_active_state = ui->changeCarActiveStateComboBox->currentText();
+    State<std::string> car_active_state_obj = stateMachine->find_state_by_name(car_active_state.toStdString());
+    stateMachine->change_car_active_state(ui->chooseCarComboBox->currentIndex() + 1, car_active_state_obj.get_id());
+    if (car_active_state_obj.get_states()->size() != 0 && car_old_state_id != car_active_state_obj.get_id())
+    {
+        State<std::string> first_substate = car_active_state_obj.get_states()->front();
+        std::vector<Passenger> * passengers = stateMachine->find_car_passengers(ui->chooseCarComboBox->currentIndex() + 1);
+        for(auto passengerIterator = passengers->begin(); passengerIterator != passengers->end(); ++passengerIterator)
+        {
+            passengerIterator->set_state_id(first_substate.get_id());
+        }
+
+
+    }
+
+    if (car_old_state_id != car_active_state_obj.get_id())
+    {
+        QMessageBox::information(0, "INFO", "Car state was successfully changed!");
+    }
+
+    //trip finished, all passengers should be deleted
+    if (car_active_state_obj.get_id() == 4)
+    {
+        stateMachine->remove_car_passengers(car.get_id());
+    }
+
+    fill_car_passengers_for_substates();
+    fill_free_passengers_for_substates();
+    fill_change_passenger_state_for_substates();
+    fill_car_reachable_states();
+}
+
+void MainWindow::fill_car_reachable_states()
+{
+    QString car_current_state = ui->changeCarActiveStateComboBox->currentText();
+    State<std::string> car_current_state_obj = stateMachine->find_state_by_name(car_current_state.toStdString());
+
+    ui->changeCarActiveStateComboBox->clear();
+
+    ui->changeCarActiveStateComboBox->addItem(QString::fromStdString(car_current_state_obj.get_value()));
+    std::vector<State<std::string>> reachable_states = stateMachine->get_reachable_states_from_current(car_current_state_obj);
+    for(auto rsIterator = reachable_states.begin(); rsIterator != reachable_states.end(); ++rsIterator)
+    {
+       ui->changeCarActiveStateComboBox->addItem(QString::fromStdString(rsIterator->get_value()));
     }
 }

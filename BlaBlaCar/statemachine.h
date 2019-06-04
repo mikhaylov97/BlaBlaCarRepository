@@ -231,6 +231,22 @@ namespace StateMachineBlaBlaCar
             return &passengers;
         }
 
+        void remove_car_passengers(int car_id)
+        {
+            auto car = std::find_if(
+                        cars.begin(),
+                        cars.end(),
+                        [&car_id](const Car<void> & car) { return car.get_id() == car_id; }
+            );
+
+            if (car == cars.end())
+            {
+                throw CarNotFoundException(std::to_string(car_id));
+            }
+
+            car->get_passengers()->clear();
+        }
+
 
         State<T> & find_state_by_name(std::string state_name)
         {
@@ -268,6 +284,33 @@ namespace StateMachineBlaBlaCar
             );
             return *state;
         }
+
+        State<T> & find_substate_by_id(int superstate_id, int substate_id)
+        {
+            auto state = std::find_if(
+                        states.begin(),
+                        states.end(),
+                        [&superstate_id](const State<T> & state) { return state.get_id() == superstate_id; }
+            );
+            if (state == states.end())
+            {
+                throw StateNotFoundException(std::to_string(superstate_id));
+            }
+
+            auto substate = std::find_if(
+                        state->get_states()->begin(),
+                        state->get_states()->end(),
+                        [&substate_id](State<T> state) { return state.get_id() == substate_id; }
+                    );
+
+            if (substate == state->get_states()->end())
+            {
+                throw StateNotFoundException(std::to_string(substate_id));
+            }
+
+            return *substate;
+        }
+
 
         std::vector<Transition<T>> find_all_transitions_for_superstate(State<T> superstate)
         {
@@ -463,6 +506,34 @@ namespace StateMachineBlaBlaCar
         void add_passenger_login(std::string login)
         {
             passengers.push_back(login);
+        }
+
+        void change_car_active_state(int car_id, int active_state_id)
+        {
+            auto car = std::find_if(
+                        cars.begin(),
+                        cars.end(),
+                        [&car_id](Car<void> car) { return car.get_id() == car_id;}
+                    );
+            if (car != cars.end())
+            {
+                car->set_state_id(active_state_id);
+            }
+        }
+
+        Car<void> find_car_by_id(int car_id)
+        {
+            auto car = std::find_if(
+                        cars.begin(),
+                        cars.end(),
+                        [&car_id](Car<void> car) { return car.get_id() == car_id; }
+                    );
+            if (car == cars.end())
+            {
+                throw CarNotFoundException(std::to_string(car_id));
+            }
+
+            return *car;
         }
 
         void add_car(Car<void> car)
