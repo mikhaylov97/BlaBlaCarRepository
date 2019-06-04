@@ -188,6 +188,8 @@ void MainWindow::on_addStatePushButton_clicked()
     ui->deleteTransitionToComboBox->addItem(stateName);
     ui->addStateNameInputField->clear();
     QMessageBox::information(0, "INFO", "State added!");
+
+    ui->graphFrame->setScene(scene->drawScene());
 }
 
 void MainWindow::on_deleteStatePushButton_clicked()
@@ -208,6 +210,8 @@ void MainWindow::on_deleteStatePushButton_clicked()
     //    ui->addTransitionToComboBox->removeItem(current_index_add_transition_to);
 
         QMessageBox::information(0, "INFO", "State deleted!");
+
+        ui->graphFrame->setScene(scene->drawScene());
     }
 }
 
@@ -227,6 +231,8 @@ void MainWindow::on_addTransitionPushButton_clicked()
     ui->addTransitionActionInputField->clear();
 
     QMessageBox::information(0, "INFO", "Transition added!");
+
+    ui->graphFrame->setScene(scene->drawScene());
 }
 
 void MainWindow::on_deleteTransitionPushButton_clicked()
@@ -244,6 +250,8 @@ void MainWindow::on_deleteTransitionPushButton_clicked()
     stateMachine->delete_transition(initial_state.get_id(), final_state.get_id());
 
     QMessageBox::information(0, "INFO", "Transition deleted!");
+
+    ui->graphFrame->setScene(scene->drawScene());
 }
 
 void MainWindow::on_checkStatesReachabilityPushButton_clicked()
@@ -264,7 +272,6 @@ void MainWindow::on_checkStatesReachabilityPushButton_clicked()
         QMessageBox::information(0, "INFO", "All states are reachable!");
     } else {
         QMessageBox::information(0, "INFO", "States with following names are not reachable: " + states_str);
-
     }
 }
 
@@ -295,6 +302,8 @@ void MainWindow::on_addStateCarSpecificPushButton_clicked()
         fill_add_transitions_for_substates();
         fill_delete_transitions_for_substates();
         fill_change_passenger_state_for_substates();
+
+        ui->graphFrame->setScene(scene->drawScene());
     }
 }
 
@@ -356,6 +365,8 @@ void MainWindow::on_deleteStateCarSpecificPushButton_clicked()
         fill_add_transitions_for_substates();
         fill_delete_transitions_for_substates();
         fill_change_passenger_state_for_substates();
+
+        ui->graphFrame->setScene(scene->drawScene());
     } else {
         QMessageBox::information(0, "INFO", "Substate cannot be removed! Some of passengers has that state as active!");
     }
@@ -381,8 +392,11 @@ void MainWindow::on_addTransitionCarSpecificPushButton_clicked()
 
         fill_add_transitions_for_substates();
         fill_delete_transitions_for_substates();
+        fill_change_passenger_state_for_substates();
 
         QMessageBox::information(0, "INFO", "Transition between substates was successfully added!");
+
+        ui->graphFrame->setScene(scene->drawScene());
     }
 }
 
@@ -400,8 +414,11 @@ void MainWindow::on_deleteTransitionCarSpecificPushButton_clicked()
 
     fill_add_transitions_for_substates();
     fill_delete_transitions_for_substates();
+    fill_change_passenger_state_for_substates();
 
     QMessageBox::information(0, "INFO", "Transition between substates was successfully deleted!");
+
+    ui->graphFrame->setScene(scene->drawScene());
 }
 
 void MainWindow::on_deleteTransitionCarSpecificFromComboBox_currentTextChanged(const QString &arg1)
@@ -785,6 +802,8 @@ void MainWindow::on_deletePassengerCarSpecificPushButton_clicked()
         QMessageBox::information(0, "INFO", "Passenger was successfully removed!");
 
         fill_car_passengers_for_substates();
+
+        ui->graphFrame->setScene(scene->drawScene());
     }
 }
 
@@ -807,6 +826,8 @@ void MainWindow::on_addNewPassengerCarSpecificPushButton_clicked()
 
             fill_car_passengers_for_substates();
             fill_free_passengers_for_substates();
+
+            ui->graphFrame->setScene(scene->drawScene());
         }
     }
 }
@@ -820,20 +841,47 @@ void MainWindow::fill_change_passenger_state_for_substates()
     State<std::string> car_active_state_obj = stateMachine->find_state_by_name(car_active_state.toStdString());
     if (car_active_state_obj.get_states()->size() != 0)
     {
+        bool is_values_for_state_dropdown_defined = false;
         std::vector<Passenger> * passengers = stateMachine->find_car_passengers(ui->chooseCarComboBox->currentIndex() + 1);
         for(auto passengerIterator = passengers->begin(); passengerIterator != passengers->end(); ++passengerIterator)
         {
-            ui->changePassengerStateLoginComboBox->addItem(QString::fromStdString(passengerIterator->get_login()));
-            if (ui->changePassengerStateStateComboBox->count() == 0)
+            bool is_transitions_exist_to_login = false;
+            std::vector<Transition<std::string>> transitions = stateMachine->find_all_transitions_for_superstate(car_active_state_obj);
+            State<std::string> passenger_active_state;
+            if (stateMachine->is_substate_exists_by_id(car_active_state_obj.get_id(), passengerIterator->get_state_id()))
             {
-                State<std::string> passenger_active_state = stateMachine->find_substate_by_id(car_active_state_obj.get_id(), passengerIterator->get_state_id());
-                for(auto substatesIterator = car_active_state_obj.get_states()->begin(); substatesIterator != car_active_state_obj.get_states()->end(); ++substatesIterator)
+                passenger_active_state = stateMachine->find_substate_by_id(car_active_state_obj.get_id(), passengerIterator->get_state_id());
+            } else if (stateMachine->is_substate_exists_in_other_superstates(passengerIterator->get_state_id())) {
+                passengerIterator->set_state_id(car_active_state_obj.get_states()->front().get_id());
+                passenger_active_state = stateMachine->find_substate_by_id(car_active_state_obj.get_id(), passengerIterator->get_state_id());
+            }
+            //State<std::string> passenger_active_state = stateMachine->find_substate_by_id(car_active_state_obj.get_id(), passengerIterator->get_state_id());
+            for(auto substatesIterator = car_active_state_obj.get_states()->begin(); substatesIterator != car_active_state_obj.get_states()->end(); ++substatesIterator)
+            {
+                if (passenger_active_state.get_id() != substatesIterator->get_id())
                 {
-                    if (passenger_active_state.get_id() != substatesIterator->get_id())
+                    int initial_state_id = passengerIterator->get_state_id();
+                    int final_state_id = substatesIterator->get_id();
+                    auto transition = std::find_if(
+                                transitions.begin(),
+                                transitions.end(),
+                                [&initial_state_id,&final_state_id] (Transition<std::string> t) { return t.get_initial_state().get_id() == initial_state_id && t.get_final_state().get_id() == final_state_id; }
+                    );
+                    if (transition != transitions.end())
                     {
-                        ui->changePassengerStateStateComboBox->addItem(QString::fromStdString(substatesIterator->get_value()));
+                        is_transitions_exist_to_login = true;
+                        if (!is_values_for_state_dropdown_defined)
+                        {
+                            ui->changePassengerStateStateComboBox->addItem(QString::fromStdString(substatesIterator->get_value()));
+                        }
                     }
                 }
+            }
+
+            if (ui->changePassengerStateStateComboBox->count() != 0 && is_transitions_exist_to_login)
+            {
+                is_values_for_state_dropdown_defined = true;
+                ui->changePassengerStateLoginComboBox->addItem(QString::fromStdString(passengerIterator->get_login()));
             }
         }
 
@@ -888,6 +936,8 @@ void MainWindow::on_changeCarActiveStatePushButton_clicked()
     fill_free_passengers_for_substates();
     fill_change_passenger_state_for_substates();
     fill_car_reachable_states();
+
+    ui->graphFrame->setScene(scene->drawScene());
 }
 
 void MainWindow::fill_car_reachable_states()
@@ -919,7 +969,10 @@ void MainWindow::on_changePassengerStatePushButton_clicked()
 
     QMessageBox::information(0, "INFO", "Passenger state was successfully changed!");
 
-    on_changePassengerStateLoginComboBox_activated(current_passenger);
+//    on_changePassengerStateLoginComboBox_activated(current_passenger);
+    fill_change_passenger_state_for_substates();
+
+    ui->graphFrame->setScene(scene->drawScene());
 }
 
 void MainWindow::on_changePassengerStateLoginComboBox_activated(const QString &arg1)
@@ -929,12 +982,23 @@ void MainWindow::on_changePassengerStateLoginComboBox_activated(const QString &a
     QString current_passenger = ui->changePassengerStateLoginComboBox->currentText();
     QString current_car_state = ui->changeCarActiveStateComboBox->currentText();
     State<std::string> current_car_state_obj = stateMachine->find_state_by_name(current_car_state.toStdString());
+    std::vector<Transition<std::string>> transitions = stateMachine->find_all_transitions_for_superstate(current_car_state_obj);
     Passenger passenger = stateMachine->find_car_passenger(ui->chooseCarComboBox->currentIndex() + 1, current_passenger.toStdString());
     for(auto substateIterator = current_car_state_obj.get_states()->begin(); substateIterator != current_car_state_obj.get_states()->end(); ++substateIterator)
     {
         if (passenger.get_state_id() != substateIterator->get_id())
         {
-            ui->changePassengerStateStateComboBox->addItem(QString::fromStdString(substateIterator->get_value()));
+            int initial_state_id = passenger.get_state_id();
+            int final_state_id = substateIterator->get_id();
+            auto transition = std::find_if(
+                        transitions.begin(),
+                        transitions.end(),
+                        [&initial_state_id,&final_state_id] (Transition<std::string> t) { return t.get_initial_state().get_id() == initial_state_id && t.get_final_state().get_id() == final_state_id; }
+            );
+            if (transition != transitions.end())
+            {
+                ui->changePassengerStateStateComboBox->addItem(QString::fromStdString(substateIterator->get_value()));
+            }
         }
     }
 }

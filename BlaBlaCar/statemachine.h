@@ -354,6 +354,54 @@ namespace StateMachineBlaBlaCar
             return *state;
         }
 
+        bool is_substate_exists_in_other_superstates(int substate_id)
+        {
+            for(auto stateIterator = states.begin(); stateIterator != states.end(); ++stateIterator)
+            {
+                if (stateIterator->get_states()->size() > 0)
+                {
+                    auto substate = std::find_if(
+                                stateIterator->get_states()->begin(),
+                                stateIterator->get_states()->end(),
+                                [&substate_id](State<T> state) { return state.get_id() == substate_id; }
+                    );
+
+                    if (substate != stateIterator->get_states()->end())
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        bool is_substate_exists_by_id(int superstate_id, int substate_id)
+        {
+            auto state = std::find_if(
+                        states.begin(),
+                        states.end(),
+                        [&superstate_id](const State<T> & state) { return state.get_id() == superstate_id; }
+            );
+            if (state == states.end())
+            {
+                throw StateNotFoundException(std::to_string(superstate_id));
+            }
+
+            auto substate = std::find_if(
+                        state->get_states()->begin(),
+                        state->get_states()->end(),
+                        [&substate_id](State<T> state) { return state.get_id() == substate_id; }
+                    );
+
+            if (substate == state->get_states()->end())
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         State<T> & find_substate_by_id(int superstate_id, int substate_id)
         {
             auto state = std::find_if(
