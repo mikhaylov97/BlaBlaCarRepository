@@ -231,6 +231,33 @@ namespace StateMachineBlaBlaCar
             return &passengers;
         }
 
+        Passenger find_car_passenger(int car_id, std::string login)
+        {
+            auto car = std::find_if(
+                        cars.begin(),
+                        cars.end(),
+                        [&car_id](const Car<void> & car) { return car.get_id() == car_id; }
+            );
+
+            if (car == cars.end())
+            {
+                throw CarNotFoundException(std::to_string(car_id));
+            }
+
+            auto passenger = std::find_if(
+                        car->get_passengers()->begin(),
+                        car->get_passengers()->end(),
+                        [&login](Passenger p) { return p.get_login().compare(login) == 0; }
+            );
+
+            if (passenger == car->get_passengers()->end())
+            {
+                throw PassengerNotFoundException(login);
+            }
+
+            return *passenger;
+        }
+
         void remove_car_passengers(int car_id)
         {
             auto car = std::find_if(
@@ -247,6 +274,32 @@ namespace StateMachineBlaBlaCar
             car->get_passengers()->clear();
         }
 
+        void change_passenger_active_state(int car_id, std::string login, int state_id)
+        {
+            auto car = std::find_if(
+                        cars.begin(),
+                        cars.end(),
+                        [&car_id](const Car<void> & car) { return car.get_id() == car_id; }
+            );
+
+            if (car == cars.end())
+            {
+                throw CarNotFoundException(std::to_string(car_id));
+            }
+
+            auto passenger = std::find_if(
+                        car->get_passengers()->begin(),
+                        car->get_passengers()->end(),
+                        [&login](Passenger p) { return p.get_login().compare(login) == 0; }
+            );
+
+            if (passenger == car->get_passengers()->end())
+            {
+                throw PassengerNotFoundException(login);
+            }
+
+            passenger->set_state_id(state_id);
+        }
 
         State<T> & find_state_by_name(std::string state_name)
         {

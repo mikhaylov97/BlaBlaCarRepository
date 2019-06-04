@@ -63,6 +63,10 @@ private slots:
 
     void on_changeCarActiveStatePushButton_clicked();
 
+    void on_changePassengerStatePushButton_clicked();
+
+    void on_changePassengerStateLoginComboBox_activated(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
 };

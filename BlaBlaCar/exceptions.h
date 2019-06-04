@@ -30,6 +30,13 @@ namespace StateMachineBlaBlaCar
         CarNotFoundException(std::string id): Exception("Car with id [" + id + "] not found!"){}
     };
 
+    class PassengerNotFoundException: public Exception {
+    private:
+        std::string login;
+    public:
+        PassengerNotFoundException(std::string login): Exception("Passenger with login [" + login + "] not found!"){}
+    };
+
     class SerializationException: public Exception {
     private:
        std::string file_name;
