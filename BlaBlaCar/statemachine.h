@@ -333,7 +333,7 @@ namespace StateMachineBlaBlaCar
             );
 
             AssertStateExistsExc(superstate_id);
-            AssertIllegalTransitions();
+            //AssertIllegalTransitions();
         }
 
         void delete_state(std::string state_name)
@@ -429,21 +429,55 @@ namespace StateMachineBlaBlaCar
         {
             AssertTransitionNotExistsExc(first_state_id, second_state_id);
 
-            auto initial_state = std::find_if(
-                        states.begin(),
-                        states.end(),
-                        [&first_state_id](const State<T> & state) { return state.get_id() == first_state_id; }
-            );
-            auto final_state = std::find_if(
-                        states.begin(),
-                        states.end(),
-                        [&second_state_id](const State<T> & state) { return state.get_id() == second_state_id; }
-            );
-            if (initial_state == states.end() || final_state == states.end())
+            bool initialStateFound = false;
+            bool finalStateFound = false;
+            State<T> initialState;
+            State<T> finalState;
+            for (auto stateIterator = states.begin(); stateIterator != states.end(); ++stateIterator)
+            {
+                if (stateIterator->get_id() == first_state_id)
+                {
+                    initialState = *stateIterator;
+                    initialStateFound = true;
+                }
+                if (stateIterator->get_id() == second_state_id)
+                {
+                    finalState = *stateIterator;
+                    finalStateFound = true;
+                }
+                if (stateIterator->get_states()->size() > 0)
+                {
+                    for (auto substateIterator = stateIterator->get_states()->begin(); substateIterator != stateIterator->get_states()->end(); ++substateIterator)
+                    {
+                        if (substateIterator->get_id() == first_state_id)
+                        {
+                            initialState = *substateIterator;
+                            initialStateFound = true;
+                        }
+                        if (substateIterator->get_id() == second_state_id)
+                        {
+                            finalState = *substateIterator;
+                            finalStateFound = true;
+                        }
+                    }
+                }
+            }
+
+//            auto initial_state = std::find_if(
+//                        states.begin(),
+//                        states.end(),
+//                        [&first_state_id](State<T> & state) { return state.get_id() == first_state_id;}
+//            );
+//            auto final_state = std::find_if(
+//                        states.begin(),
+//                        states.end(),
+//                        [&second_state_id](const State<T> & state) { return state.get_id() == second_state_id; }
+//            );
+            if (!initialStateFound || !finalStateFound)
             {
                 throw StateNotFoundException("0");
             }
-            Transition<T> * transition = new Transition<T>(name, *initial_state, *final_state, one_way);
+            Transition<T> * transition = new Transition<T>(name, initialState, finalState, one_way);
             transitions.push_back(*transition);
 
             AssertTransitionExists(transition->get_id());
