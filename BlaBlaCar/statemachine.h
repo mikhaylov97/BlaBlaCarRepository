@@ -311,6 +311,22 @@ namespace StateMachineBlaBlaCar
             return *state;
         }
 
+        bool is_substate_is_available_for_removing(int substate_id)
+        {
+            for(auto carIterator = cars.begin(); carIterator != cars.end(); ++carIterator)
+            {
+                for (auto passengerIterator = carIterator->get_passengers()->begin(); passengerIterator != carIterator->get_passengers()->end(); ++passengerIterator)
+                {
+                    if (passengerIterator->get_state_id() == substate_id)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
         State<T> & find_substate_by_name(std::string name, int superstate_id)
         {
             auto state = std::find_if(
