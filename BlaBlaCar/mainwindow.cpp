@@ -18,8 +18,6 @@ MainWindow::MainWindow(QWidget *parent) :
     serializer.import_from_json(stateMachine);
 
     ui->setupUi(this);
-    scene = new Scene(stateMachine);
-    ui->graphFrame->setScene(scene->drawScene());
 
 
     for(auto stateIterator = stateMachine->get_states_vector()->begin(); stateIterator != stateMachine->get_states_vector()->end(); ++stateIterator)
@@ -75,6 +73,8 @@ MainWindow::MainWindow(QWidget *parent) :
     fill_free_passengers_for_substates();
     fill_car_passengers_for_substates();
     fill_change_passenger_state_for_substates();
+    scene = new Scene(stateMachine, ui);
+    ui->graphFrame->setScene(scene->drawScene());
     //ui->setupUi(this);
 }
 
