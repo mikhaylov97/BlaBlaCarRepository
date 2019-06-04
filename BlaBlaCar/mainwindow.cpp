@@ -195,7 +195,7 @@ void MainWindow::on_deleteStatePushButton_clicked()
     int current_index_state = ui->deleteStateComboBox->currentIndex();
     QString current_state_name = ui->deleteStateComboBox->currentText();
     State<std::string> current_state_obj = stateMachine->find_state_by_name(current_state_name.toStdString());
-    if (current_state_obj.get_id() == 3)
+    if (current_state_obj.get_id() == 3 || current_state_obj.get_id() == 2 || current_state_obj.get_id() == 4)
     {
         QMessageBox::information(0, "INFO", "That state cannot be deleted! It's important to app business logic!");
     } else {
