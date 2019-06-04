@@ -942,8 +942,27 @@ void MainWindow::on_changeCarActiveStatePushButton_clicked()
 
 void MainWindow::fill_car_reachable_states()
 {
-    QString car_current_state = ui->changeCarActiveStateComboBox->currentText();
-    State<std::string> car_current_state_obj = stateMachine->find_state_by_name(car_current_state.toStdString());
+    Car<void> current_car = stateMachine->find_car_by_id(ui->chooseCarComboBox->currentIndex() + 1);
+    //QString car_current_state = ui->changeCarActiveStateComboBox->currentText();
+    //State<std::string> car_current_state_obj = stateMachine->find_state_by_name(car_current_state.toStdString());
+    State<std::string> car_current_state_obj = stateMachine->find_state_by_id(current_car.get_state_id());
+
+    ui->changeCarActiveStateComboBox->clear();
+
+    ui->changeCarActiveStateComboBox->addItem(QString::fromStdString(car_current_state_obj.get_value()));
+    std::vector<State<std::string>> reachable_states = stateMachine->get_reachable_states_from_current(car_current_state_obj);
+    for(auto rsIterator = reachable_states.begin(); rsIterator != reachable_states.end(); ++rsIterator)
+    {
+       ui->changeCarActiveStateComboBox->addItem(QString::fromStdString(rsIterator->get_value()));
+    }
+}
+
+void MainWindow::fill_car_reachable_states(int car_id)
+{
+    Car<void> current_car = stateMachine->find_car_by_id(car_id);
+    //QString car_current_state = ui->changeCarActiveStateComboBox->currentText();
+    //State<std::string> car_current_state_obj = stateMachine->find_state_by_name(car_current_state.toStdString());
+    State<std::string> car_current_state_obj = stateMachine->find_state_by_id(current_car.get_state_id());
 
     ui->changeCarActiveStateComboBox->clear();
 
@@ -1001,4 +1020,16 @@ void MainWindow::on_changePassengerStateLoginComboBox_activated(const QString &a
             }
         }
     }
+}
+
+void MainWindow::on_chooseCarComboBox_activated(int index)
+{
+    fill_add_transitions_for_substates();
+    fill_delete_transitions_for_substates();
+    fill_car_reachable_states(index + 1);
+    fill_free_passengers_for_substates();
+    fill_car_passengers_for_substates();
+    fill_change_passenger_state_for_substates();
+
+    ui->graphFrame->setScene(scene->drawScene());
 }

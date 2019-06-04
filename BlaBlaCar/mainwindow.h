@@ -26,6 +26,7 @@ public:
     void fill_delete_transitions_for_substates(QString state_name);
     void fill_change_passenger_state_for_substates();
     void fill_car_reachable_states();
+    void fill_car_reachable_states(int car_id);
     ~MainWindow();
     StateMachineBlaBlaCar::StateMachine<std::string, StateMachineBlaBlaCar::Allocator<std::string>> * stateMachine;
     StateMachineBlaBlaCar::Scene* scene;
@@ -68,6 +69,8 @@ private slots:
     void on_changePassengerStatePushButton_clicked();
 
     void on_changePassengerStateLoginComboBox_activated(const QString &arg1);
+
+    void on_chooseCarComboBox_activated(int index);
 
 private:
     Ui::MainWindow *ui;

@@ -206,7 +206,6 @@ namespace StateMachineBlaBlaCar
 
         std::vector<Passenger> * find_free_passengers(int except_car_id)
         {
-            std::vector<Passenger> free_passengers;
             for(auto carIterator = cars.begin(); carIterator != cars.end(); ++carIterator)
             {
                 if (carIterator->get_id() != except_car_id && carIterator->get_state_id() == 2)
@@ -215,12 +214,13 @@ namespace StateMachineBlaBlaCar
                     return carIterator->get_passengers();
                 }
             }
-            return &free_passengers;
+
+            std::vector<Passenger> * passengers = new std::vector<Passenger>();
+            return passengers;
         }
 
         std::vector<Passenger> * find_car_passengers(int car_id)
         {
-            std::vector<Passenger> passengers;
             for(auto carIterator = cars.begin(); carIterator != cars.end(); ++carIterator)
             {
                 if (carIterator->get_id() == car_id)
@@ -228,7 +228,9 @@ namespace StateMachineBlaBlaCar
                     return carIterator->get_passengers();
                 }
             }
-            return &passengers;
+
+            std::vector<Passenger> * passengers = new std::vector<Passenger>();
+            return passengers;
         }
 
         Passenger find_car_passenger(int car_id, std::string login)
