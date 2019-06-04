@@ -75,6 +75,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     fill_add_transitions_for_substates();
     fill_delete_transitions_for_substates();
+    fill_free_passengers_for_substates();
+    fill_car_passengers_for_substates();
     //ui->setupUi(this);
 }
 
@@ -704,5 +706,97 @@ void MainWindow::fill_delete_transitions_for_substates(QString state_name)
         ui->deleteTransitionCarSpecificFromComboBox->setEnabled(true);
         ui->deleteTransitionCarSpecificToComboBox->setEnabled(true);
         ui->deleteTransitionCarSpecificPushButton->setEnabled(true);
+    }
+}
+
+void MainWindow::fill_free_passengers_for_substates()
+{
+    ui->addNewPassengerCarSpecificComboBox->clear();
+
+    QString car_state = ui->changeCarActiveStateComboBox->currentText();
+    State<std::string> car_state_obj = stateMachine->find_state_by_name(car_state.toStdString());
+    if (car_state_obj.get_id() != 2) {
+        ui->addNewPassengerCarSpecificComboBox->setEnabled(false);
+        ui->addNewPassengerCarSpecificPushButton->setEnabled(false);
+    } else {
+        ui->addNewPassengerCarSpecificComboBox->setEnabled(true);
+        ui->addNewPassengerCarSpecificPushButton->setEnabled(true);
+
+        std::vector<Passenger> * free_passengers = stateMachine->find_free_passengers(ui->chooseCarComboBox->currentIndex() + 1);
+        for(auto iterator = free_passengers->begin(); iterator != free_passengers->end(); ++iterator)
+        {
+            ui->addNewPassengerCarSpecificComboBox->addItem(QString::fromStdString(iterator->get_login()));
+        }
+
+        if (ui->addNewPassengerCarSpecificComboBox->count() == 0) {
+            ui->addNewPassengerCarSpecificComboBox->setEnabled(false);
+            ui->addNewPassengerCarSpecificPushButton->setEnabled(false);
+        }
+    }
+}
+
+void MainWindow::fill_car_passengers_for_substates()
+{
+    ui->deletePassengerCarSpecificComboBox->clear();
+
+    QString car_state = ui->changeCarActiveStateComboBox->currentText();
+    State<std::string> car_state_obj = stateMachine->find_state_by_name(car_state.toStdString());
+    if (car_state_obj.get_id() != 2) {
+        ui->deletePassengerCarSpecificComboBox->setEnabled(false);
+        ui->deletePassengerCarSpecificPushButton->setEnabled(false);
+    } else {
+        ui->deletePassengerCarSpecificComboBox->setEnabled(true);
+        ui->deletePassengerCarSpecificPushButton->setEnabled(true);
+
+        std::vector<Passenger> * passengers = stateMachine->find_car_passengers(ui->chooseCarComboBox->currentIndex() + 1);
+        for(auto iterator = passengers->begin(); iterator != passengers->end(); ++iterator)
+        {
+            ui->deletePassengerCarSpecificComboBox->addItem(QString::fromStdString(iterator->get_login()));
+        }
+
+        if (ui->deletePassengerCarSpecificComboBox->count() == 0) {
+            ui->deletePassengerCarSpecificComboBox->setEnabled(false);
+            ui->deletePassengerCarSpecificPushButton->setEnabled(false);
+        }
+    }
+}
+
+void MainWindow::on_deletePassengerCarSpecificPushButton_clicked()
+{
+    QString car_state = ui->changeCarActiveStateComboBox->currentText();
+    State<std::string> car_state_obj = stateMachine->find_state_by_name(car_state.toStdString());
+    if (car_state_obj.get_id() != 2)
+    {
+        QMessageBox::information(0, "INFO", "Passenger cannot be removed, car is not at planning state!");
+    } else {
+        QString login = ui->deletePassengerCarSpecificComboBox->currentText();
+        stateMachine->delete_passenger(ui->chooseCarComboBox->currentIndex() + 1,login.toStdString());
+
+        QMessageBox::information(0, "INFO", "Passenger was successfully removed!");
+
+        fill_car_passengers_for_substates();
+    }
+}
+
+void MainWindow::on_addNewPassengerCarSpecificPushButton_clicked()
+{
+    QString car_state = ui->changeCarActiveStateComboBox->currentText();
+    State<std::string> car_state_obj = stateMachine->find_state_by_name(car_state.toStdString());
+    if (car_state_obj.get_id() != 2)
+    {
+        QMessageBox::information(0, "INFO", "Passenger cannot be added, car is not at planning state!");
+    } else {
+        std::vector<Passenger> * passengers = stateMachine->find_car_passengers(ui->chooseCarComboBox->currentIndex() + 1);
+        if (passengers->size() == 3) {
+            QMessageBox::information(0, "INFO", "Passenger cannot be added, car is fully packed!");
+        } else if (passengers->size() < 3) {
+            QString login = ui->addNewPassengerCarSpecificComboBox->currentText();
+            stateMachine->add_passenger_to_car(ui->chooseCarComboBox->currentIndex() + 1,login.toStdString());
+
+            QMessageBox::information(0, "INFO", "Passenger was successfully added to car!");
+
+            fill_car_passengers_for_substates();
+            fill_free_passengers_for_substates();
+        }
     }
 }

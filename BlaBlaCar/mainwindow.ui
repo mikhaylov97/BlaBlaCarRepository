@@ -425,7 +425,7 @@
          <string>Passenger:</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="addNewPassengerCarSpecificPushButton">
         <property name="geometry">
          <rect>
           <x>110</x>
@@ -438,7 +438,7 @@
          <string>Add</string>
         </property>
        </widget>
-       <widget class="QComboBox" name="comboBox_4">
+       <widget class="QComboBox" name="deletePassengerCarSpecificComboBox">
         <property name="geometry">
          <rect>
           <x>270</x>
@@ -474,7 +474,7 @@
          <string>Add state:</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="deletePassengerCarSpecificPushButton">
         <property name="geometry">
          <rect>
           <x>300</x>
@@ -533,7 +533,7 @@
          </rect>
         </property>
        </widget>
-       <widget class="QComboBox" name="comboBox_2">
+       <widget class="QComboBox" name="addNewPassengerCarSpecificComboBox">
         <property name="geometry">
          <rect>
           <x>80</x>

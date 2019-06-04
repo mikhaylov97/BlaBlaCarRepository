@@ -204,6 +204,34 @@ namespace StateMachineBlaBlaCar
             transitions.push_back(*transition);
         }
 
+        std::vector<Passenger> * find_free_passengers(int except_car_id)
+        {
+            std::vector<Passenger> free_passengers;
+            for(auto carIterator = cars.begin(); carIterator != cars.end(); ++carIterator)
+            {
+                if (carIterator->get_id() != except_car_id && carIterator->get_state_id() == 2)
+                {
+                    //car in planing state. Such passengers are free, because they only commited to trip, but not on the way
+                    return carIterator->get_passengers();
+                }
+            }
+            return &free_passengers;
+        }
+
+        std::vector<Passenger> * find_car_passengers(int car_id)
+        {
+            std::vector<Passenger> passengers;
+            for(auto carIterator = cars.begin(); carIterator != cars.end(); ++carIterator)
+            {
+                if (carIterator->get_id() == car_id)
+                {
+                    return carIterator->get_passengers();
+                }
+            }
+            return &passengers;
+        }
+
+
         State<T> & find_state_by_name(std::string state_name)
         {
             auto state = std::find_if(
@@ -373,6 +401,63 @@ namespace StateMachineBlaBlaCar
 
             AssertStateNotExists(state_id);
             AssertIllegalTransitions();
+        }
+
+        void add_passenger_to_car(int car_id, std::string login) {
+            //aseert
+            auto car = std::find_if(
+                        cars.begin(),
+                        cars.end(),
+                        [&car_id](const Car<void> car) { return car.get_id() == car_id; }
+            );
+            if (car == cars.end())
+            {
+                throw CarNotFoundException(std::to_string(car_id));
+            }
+
+            Passenger * new_passenger;
+            for(auto carIterator = cars.begin(); carIterator != cars.end(); ++carIterator)
+            {
+                auto passenger = std::find_if(
+                            carIterator->get_passengers()->begin(),
+                            carIterator->get_passengers()->end(),
+                            [&login](Passenger p) { return p.get_login().compare(login) == 0; }
+                        );
+                if (passenger != carIterator->get_passengers()->end())
+                {
+                    new_passenger = new Passenger(passenger->get_login(), passenger->get_state_id());
+                    carIterator->get_passengers()->erase(passenger);
+                    break;
+                }
+            }
+
+            car->get_passengers()->push_back(*new_passenger);
+            //assert
+        }
+
+        void delete_passenger(int car_id, std::string login)
+        {
+            //aseert
+            auto car = std::find_if(
+                        cars.begin(),
+                        cars.end(),
+                        [&car_id](const Car<void> & car) { return car.get_id() == car_id; }
+            );
+            if (car == cars.end())
+            {
+                throw CarNotFoundException(std::to_string(car_id));
+            }
+
+            car->get_passengers()->erase(
+                std::remove_if(
+                    car->get_passengers()->begin(),
+                    car->get_passengers()->end(),
+                    [&login](Passenger passenger) { return passenger.get_login().compare(login) == 0; }
+                ),
+                car->get_passengers()->end()
+            );
+
+            //assert
         }
 
         void add_passenger_login(std::string login)

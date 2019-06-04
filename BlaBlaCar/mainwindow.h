@@ -17,6 +17,8 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     void fill_add_transitions_for_substates_by_default();
     void fill_delete_transitions_for_substates_by_default();
+    void fill_free_passengers_for_substates();
+    void fill_car_passengers_for_substates();
     void fill_delete_transitions_for_substates();
     void fill_add_transitions_for_substates();
     void fill_add_transitions_for_substates(QString state_name);
@@ -52,6 +54,10 @@ private slots:
     void on_addTransitionCarSpecificStateComboBox_activated(const QString &arg1);
 
     void on_deleteTransitionCarSpecificStateComboBox_activated(const QString &arg1);
+
+    void on_deletePassengerCarSpecificPushButton_clicked();
+
+    void on_addNewPassengerCarSpecificPushButton_clicked();
 
 private:
     Ui::MainWindow *ui;

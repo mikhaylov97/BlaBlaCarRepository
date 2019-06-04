@@ -6,6 +6,7 @@
 #include <vector>
 #include "state.h"
 #include "transition.h"
+#include "car.h"
 
 namespace StateMachineBlaBlaCar
 {
@@ -20,6 +21,13 @@ namespace StateMachineBlaBlaCar
         }
     private:
         std::string _msg;
+    };
+
+    class CarNotFoundException: public Exception {
+    private:
+        std::string id;
+    public:
+        CarNotFoundException(std::string id): Exception("Car with id [" + id + "] not found!"){}
     };
 
     class SerializationException: public Exception {
