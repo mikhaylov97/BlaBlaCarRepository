@@ -18,7 +18,9 @@ MainWindow::MainWindow(QWidget *parent) :
     serializer.import_from_json(stateMachine);
 
     ui->setupUi(this);
-//    ui->graphicsView->setScene(graph->draw());
+    scene = new Scene(stateMachine);
+    ui->graphFrame->setScene(scene->drawScene());
+
 
     for(auto stateIterator = stateMachine->get_states_vector()->begin(); stateIterator != stateMachine->get_states_vector()->end(); ++stateIterator)
     {

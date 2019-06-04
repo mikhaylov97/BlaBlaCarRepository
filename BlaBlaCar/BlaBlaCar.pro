@@ -26,11 +26,13 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+        scene.cpp
 
 HEADERS += \
         mainwindow.h \
     exceptions.h \
+    scene.h \
     state.h \
     transition.h \
     allocator.h \

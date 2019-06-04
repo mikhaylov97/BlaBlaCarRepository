@@ -28,8 +28,8 @@ namespace StateMachineBlaBlaCar
     private:
         int _id;
         static int _counter;
-        std::vector<State<T>, Alloc> states;
-        std::vector<Transition<T>, Alloc> transitions;
+        std::vector<State<T>, Allocator<State<T>>> states;
+        std::vector<Transition<T>, Allocator<Transition<T>>> transitions;
         std::vector<Car<void>> cars;
         std::vector<std::string> passengers;
 
@@ -776,12 +776,12 @@ namespace StateMachineBlaBlaCar
             return &passengers;
         }
 
-        std::vector<State<T>, Alloc> * get_states_vector()
+        std::vector<State<T>, Allocator<State<T>>> * get_states_vector()
         {
             return &states;
         }
 
-        std::vector<Transition<T>, Alloc> * get_transitions_vector()
+        std::vector<Transition<T>, Allocator<Transition<T>>> * get_transitions_vector()
         {
             return &transitions;
         }

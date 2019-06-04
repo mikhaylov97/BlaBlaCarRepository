@@ -25,7 +25,12 @@ class Serializer
 {
 private:
     Serializer() {}
+    #if (defined (_WIN32) || defined (_WIN64))
     QString path_to_file = "../BlaBlaCar/graph.json";
+    #elif (defined (Q_OS_MAC) || defined (Q_OS_OSX) || defined (Q_OS_MACX))
+    QString path_to_file = "../../../../BlaBlaCar/graph.json";
+#endif
+
     static Serializer * m_instance;
 
 public:

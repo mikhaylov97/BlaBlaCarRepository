@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "statemachine.h"
 #include "allocator.h"
+#include "scene.h"
 
 namespace Ui {
 class MainWindow;
@@ -27,6 +28,7 @@ public:
     void fill_car_reachable_states();
     ~MainWindow();
     StateMachineBlaBlaCar::StateMachine<std::string, StateMachineBlaBlaCar::Allocator<std::string>> * stateMachine;
+    StateMachineBlaBlaCar::Scene* scene;
 
 private slots:
     void on_addStatePushButton_clicked();
