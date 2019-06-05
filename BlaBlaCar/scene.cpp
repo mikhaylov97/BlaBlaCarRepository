@@ -18,7 +18,7 @@ QGraphicsScene* Scene::drawScene() {
 
     int subStateRadius = 10;
     QPoint sceneCenter = QPoint(300, 300);
-    int sceneRadius = 150;
+    int sceneRadius = 300;
 
     int dx = 250;
     int dy = 250;
