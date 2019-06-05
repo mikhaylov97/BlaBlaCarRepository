@@ -27,7 +27,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="userTab">
      <attribute name="title">
@@ -395,7 +395,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -808,12 +808,12 @@
          <rect>
           <x>260</x>
           <y>290</y>
-          <width>47</width>
+          <width>61</width>
           <height>21</height>
          </rect>
         </property>
         <property name="text">
-         <string>Add car:</string>
+         <string>Delete car:</string>
         </property>
        </widget>
        <widget class="QComboBox" name="deleteCarComboBox">
