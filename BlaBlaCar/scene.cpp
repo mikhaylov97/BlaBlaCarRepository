@@ -116,7 +116,7 @@ void Scene::drawTransitions(QGraphicsScene *scene, StateMachine<std::string, All
 
 QPolygonF Scene::getArrowForTransition(QPointF from, QPointF to) {
     int head_length = 10;
-    int head_width = 10;
+    int head_width = 6;
     float dx = to.x() - from.x();
     float dy = to.y() - from.y();
     float length = std::sqrt(dx*dx + dy*dy);

@@ -257,21 +257,29 @@ void MainWindow::on_deleteTransitionPushButton_clicked()
 void MainWindow::on_checkStatesReachabilityPushButton_clicked()
 {
     auto unreachable_states = get_unreachable_states(*stateMachine);
-    std::vector<std::string> states;
+    auto unreachable_substates = get_unreachable_substates(*stateMachine);
     QString states_str;
+    QString delimeter = "";
     for (auto state = unreachable_states.begin(); state != unreachable_states.end(); ++state)
     {
-        states.push_back(state->get_value());
-        if (state == unreachable_states.end()) {
-            states_str.append(QString::fromStdString(state->get_value()));
-        }
-        states_str.append(QString::fromStdString(state->get_value())).append(", ");
+        states_str.append(delimeter).append(QString::fromStdString(state->get_value()));
+        delimeter = ", ";
     }
 
-    if (states.size() == 0) {
+    if (states_str.isEmpty())
+    {
+        delimeter = "";
+    }
+    for (auto state = unreachable_substates.begin(); state != unreachable_substates.end(); ++state)
+    {
+        states_str.append(delimeter).append(QString::fromStdString(state->get_value())).append(" (sub)");
+        delimeter = ", ";
+    }
+
+    if (unreachable_states.size() == 0 && unreachable_substates.size() == 0) {
         QMessageBox::information(0, "INFO", "All states are reachable!");
     } else {
-        QMessageBox::information(0, "INFO", "States with following names are not reachable: " + states_str);
+        QMessageBox::information(0, "INFO", "States with following names are not reachable: " + states_str + ".");
     }
 }
 

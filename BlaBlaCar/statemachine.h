@@ -434,7 +434,7 @@ namespace StateMachineBlaBlaCar
         std::vector<Transition<T>> find_all_transitions_for_superstate(State<T> superstate)
         {
             std::vector<State<T>> * substates = superstate.get_states();
-            std::vector<Transition<T>> matches;
+            std::vector<Transition<T>> * matches = new std::vector<Transition<T>>();
             for(auto substateIterator = substates->begin(); substateIterator != substates->end(); ++substateIterator)
             {
                 State<T> cur_substate = *substateIterator;
@@ -444,13 +444,13 @@ namespace StateMachineBlaBlaCar
                     i = std::find_if(i, end, [&cur_substate](Transition<T> & t){return cur_substate.get_id() == t.get_initial_state().get_id();});
                   if (i != end)
                   {
-                    matches.push_back((*i));
+                    matches->push_back((*i));
                     i++;
                   }
                 }
             }
 
-            return matches;
+            return *matches;
         }
 
         std::vector<State<T>> get_reachable_states_from_current(State<T> state)

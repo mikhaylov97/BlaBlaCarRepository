@@ -22,6 +22,7 @@ namespace StateMachineBlaBlaCar
         StateMachine<T, Alloc> * stateMachine;
 
         std::vector<int> visited_states_indexes;
+        int first_state_id;
 
         State<T> * deepFirstSearch(State<T>*);
 
@@ -29,7 +30,10 @@ namespace StateMachineBlaBlaCar
         Iterator(StateMachine<T, Alloc> * stateMachine, State<T> * iterator) : iterator(iterator), stateMachine(stateMachine)
         {
             if (iterator != nullptr)
+            {
+                first_state_id = iterator->get_id();
                 visited_states_indexes.push_back(iterator->get_id());
+            }
         }
 
         Iterator<T, Alloc> & operator++();
@@ -69,6 +73,7 @@ namespace StateMachineBlaBlaCar
         Iterator<T, Alloc> tmp(*this);
 
         iterator = deepFirstSearch(iterator);
+
         if (iterator != nullptr)
             visited_states_indexes.push_back(iterator->get_id());
 
@@ -111,7 +116,7 @@ namespace StateMachineBlaBlaCar
                 i++;
             }
 
-            if (back_transitions.empty())
+            if (back_transitions.empty() || initial_state->get_id() == first_state_id)
                 return nullptr;
 
             auto back_transition = std::min_element(back_transitions.begin(), back_transitions.end(),
