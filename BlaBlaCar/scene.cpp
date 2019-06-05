@@ -26,11 +26,10 @@ QGraphicsScene* Scene::drawScene() {
     Car<void> currentCar = stateMachine->find_car_by_id(currentCarId);
 
     QMap<int, QPoint> superStateToPointMap;
-    int currentI = 0;
     for(auto stateIterator = stateMachine->get_states_vector()->begin(); stateIterator != stateMachine->get_states_vector()->end(); ++stateIterator) {
-
-        QPoint currentStateCenter = QPoint(sceneCenter.x() + sin(2 * M_PI / superStateCount * currentI) * sceneRadius,
-                                           sceneCenter.y() + cos(2 * M_PI / superStateCount * currentI) * sceneRadius);
+        int i = stateIterator - stateMachine->get_states_vector()->begin();
+        QPoint currentStateCenter = QPoint(sceneCenter.x() + sin(2 * M_PI / superStateCount * i) * sceneRadius,
+                                           sceneCenter.y() + cos(2 * M_PI / superStateCount * i) * sceneRadius);
         superStateToPointMap.insert(stateIterator->get_id(), currentStateCenter);
         if (stateIterator->get_states()->size() != 0) {
             int x0 = currentStateCenter.x() - dx / 2;
@@ -38,24 +37,22 @@ QGraphicsScene* Scene::drawScene() {
             if (stateIterator->get_id() == currentCar.get_state_id()) {
                 drawSuperState(scene, x0, y0, dx, dy, QString::fromStdString(stateIterator->get_value()), true);
                 QPoint* points = getQuarterCenters(x0, y0, dx, dy);
-                int currentJ = 1;
                 if (currentCar.get_passengers()->size() > 0) {
                     drawState(scene, points[0], subStateRadius, "drive", true);
                     drawText(scene, points[0] - QPoint(0, dy / 3.7), "driver", fontForLogin);
                 }
                 for (auto passengerIterator = currentCar.get_passengers()->begin(); passengerIterator != currentCar.get_passengers()->end(); ++passengerIterator) {
-                    int currentK = 0;
+                    int j = passengerIterator - currentCar.get_passengers()->begin() + 1;
                     QMap<int, QPoint> subStateToPointMap;
                     int subStateStatesCount = stateIterator->get_states()->size();
                     for(auto substatesIterator = stateIterator->get_states()->begin(); substatesIterator != stateIterator->get_states()->end(); ++substatesIterator) {
-                        QPoint currentSubStateCenter = QPoint(points[currentJ].x() + sin(2 * M_PI / subStateStatesCount * currentK) * dx / 7,
-                                                      points[currentJ].y() + cos(2 * M_PI / subStateStatesCount * currentK) * dy / 7);
+                        int k = substatesIterator - stateIterator->get_states()->begin();
+                        QPoint currentSubStateCenter = QPoint(points[j].x() + sin(2 * M_PI / subStateStatesCount * k) * dx / 7,
+                                                      points[j].y() + cos(2 * M_PI / subStateStatesCount * k) * dy / 7);
                         subStateToPointMap.insert(substatesIterator->get_id(), currentSubStateCenter);
                         drawState(scene, currentSubStateCenter, subStateRadius, QString::fromStdString(substatesIterator->get_value()), passengerIterator->get_state_id() == substatesIterator->get_id()); // look at this
-                        currentK++;
                     }
-                    drawText(scene, points[currentJ] - QPoint(0, dy / 3.7), QString::fromStdString(passengerIterator->get_login()), fontForLogin);
-                    currentJ++;
+                    drawText(scene, points[j] - QPoint(0, dy / 3.7), QString::fromStdString(passengerIterator->get_login()), fontForLogin);
                     drawTransitions(scene, stateMachine, subStateToPointMap);
                 }
             } else {
@@ -65,7 +62,6 @@ QGraphicsScene* Scene::drawScene() {
         } else {
             drawState(scene, currentStateCenter, subStateRadius, QString::fromStdString(stateIterator->get_value()), stateIterator->get_id() == currentCar.get_state_id());
         }
-        currentI++;
     }
     drawTransitions(scene, stateMachine, superStateToPointMap);
     return scene;
