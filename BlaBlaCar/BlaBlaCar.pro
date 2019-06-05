@@ -25,11 +25,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        graphics_view_zoom.cpp \
         main.cpp \
         mainwindow.cpp \
         scene.cpp
 
 HEADERS += \
+    graphics_view_zoom.h \
         mainwindow.h \
     exceptions.h \
     scene.h \

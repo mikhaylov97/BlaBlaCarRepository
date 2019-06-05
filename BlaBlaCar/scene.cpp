@@ -11,6 +11,9 @@ Scene::Scene(StateMachine<std::string, Allocator<std::string>>* stateMachine,
 
 QGraphicsScene* Scene::drawScene() {
     QGraphicsScene* scene = new QGraphicsScene();
+    QFont fontForLogin = QFont();
+    fontForLogin.setBold(true);
+    fontForLogin.setPixelSize(15);
     int superStateCount = stateMachine->get_states_number();
 
     int subStateRadius = 10;
@@ -36,18 +39,22 @@ QGraphicsScene* Scene::drawScene() {
                 drawSuperState(scene, x0, y0, dx, dy, QString::fromStdString(stateIterator->get_value()), true);
                 QPoint* points = getQuarterCenters(x0, y0, dx, dy);
                 int currentJ = 1;
+                if (currentCar.get_passengers()->size() > 0) {
+                    drawState(scene, points[0], subStateRadius, "drive", true);
+                    drawText(scene, points[0] - QPoint(0, dy / 3.7), "driver", fontForLogin);
+                }
                 for (auto passengerIterator = currentCar.get_passengers()->begin(); passengerIterator != currentCar.get_passengers()->end(); ++passengerIterator) {
                     int currentK = 0;
                     QMap<int, QPoint> subStateToPointMap;
                     int subStateStatesCount = stateIterator->get_states()->size();
                     for(auto substatesIterator = stateIterator->get_states()->begin(); substatesIterator != stateIterator->get_states()->end(); ++substatesIterator) {
-                        QPoint currentSubStateCenter = QPoint(points[currentJ].x() + sin(2 * M_PI / subStateStatesCount * currentK) * dx / 6,
-                                                      points[currentJ].y() + cos(2 * M_PI / subStateStatesCount * currentK) * dy / 6);
+                        QPoint currentSubStateCenter = QPoint(points[currentJ].x() + sin(2 * M_PI / subStateStatesCount * currentK) * dx / 7,
+                                                      points[currentJ].y() + cos(2 * M_PI / subStateStatesCount * currentK) * dy / 7);
                         subStateToPointMap.insert(substatesIterator->get_id(), currentSubStateCenter);
                         drawState(scene, currentSubStateCenter, subStateRadius, QString::fromStdString(substatesIterator->get_value()), passengerIterator->get_state_id() == substatesIterator->get_id()); // look at this
                         currentK++;
                     }
-                    drawText(scene, points[currentJ] - QPoint(0, dy / 4), QString::fromStdString(passengerIterator->get_login()));
+                    drawText(scene, points[currentJ] - QPoint(0, dy / 3.7), QString::fromStdString(passengerIterator->get_login()), fontForLogin);
                     currentJ++;
                     drawTransitions(scene, stateMachine, subStateToPointMap);
                 }
@@ -81,11 +88,9 @@ void Scene::drawSuperState(QGraphicsScene *scene, int x0, int y0, int dx, int dy
     drawText(scene, QPoint(x0 + dx / 2, y0 + dy), text);
 }
 
-void Scene::drawText(QGraphicsScene* scene, QPoint point, QString text) {
-    QGraphicsTextItem * io = new QGraphicsTextItem;
+void Scene::drawText(QGraphicsScene* scene, QPoint point, QString text, QFont font) {
+    QGraphicsTextItem * io = scene->addText(text, font);
     io->setPos(point);
-    io->setPlainText(text);
-    scene->addItem(io);
 }
 
 void Scene::drawEllipse(QGraphicsScene *scene, QPoint center, int radius, bool isActive) {

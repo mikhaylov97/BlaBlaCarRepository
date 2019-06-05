@@ -5,6 +5,7 @@
 #include "statemachine.h"
 #include "allocator.h"
 #include "scene.h"
+#include "graphics_view_zoom.h"
 
 namespace Ui {
 class MainWindow;

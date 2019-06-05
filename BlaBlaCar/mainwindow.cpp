@@ -75,7 +75,9 @@ MainWindow::MainWindow(QWidget *parent) :
     fill_change_passenger_state_for_substates();
     scene = new Scene(stateMachine, ui);
     ui->graphFrame->setScene(scene->drawScene());
-    //ui->setupUi(this);
+    Graphics_view_zoom* z = new Graphics_view_zoom(ui->graphFrame);
+    z->set_modifiers(Qt::NoModifier);
+    ui->graphFrame->scale(0.5,0.5);
 }
 
 MainWindow::~MainWindow()
