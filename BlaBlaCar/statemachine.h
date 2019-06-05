@@ -679,6 +679,34 @@ namespace StateMachineBlaBlaCar
             }
         }
 
+        bool is_login_available(std::string login)
+        {
+            for (auto carIterator = cars.begin(); carIterator != cars.end(); ++carIterator)
+            {
+                for (auto passengerIterator = carIterator->get_passengers()->begin(); passengerIterator != carIterator->get_passengers()->end(); ++passengerIterator)
+                {
+                    if (passengerIterator->get_login().compare(login) == 0)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        int find_first_substate_in_on_the_way_superstate()
+        {
+            int on_the_way_id = 3;
+            auto on_the_way = std::find_if(
+                        states.begin(),
+                        states.end(),
+                        [&on_the_way_id] (State<T> state) { return state.get_id() == on_the_way_id; }
+            );
+
+            return on_the_way->get_states()->front().get_id();
+        }
+
         void add_transition(Transition<T> transition) throw(StateAlreadyExistsException)
         {
             AssertTransitionNotExistsExc(transition.get_id());

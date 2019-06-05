@@ -19,6 +19,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
+    ui->tabWidget->setCurrentIndex(0);
+    ui->loginOccupiedExceptionLabel->hide();
+    ui->userMenuWidget->hide();
+    ui->userCommitedWidget->hide();
 
     for(auto stateIterator = stateMachine->get_states_vector()->begin(); stateIterator != stateMachine->get_states_vector()->end(); ++stateIterator)
     {
@@ -1152,4 +1156,176 @@ void MainWindow::on_deleteCarPushButton_clicked()
 
         ui->graphFrame->setScene(scene->drawScene());
     }
+}
+
+void MainWindow::on_signingInPushButton_clicked()
+{
+    QString login = ui->signingInLoginInputField->text();
+    if (stateMachine->is_login_available(login.toStdString()))
+    {
+        ui->signingInWidget->hide();
+        ui->userMenuWidget->show();
+        ui->findTripNotAvailableSubheaderLabel->hide();
+
+        ui->userLoginLabel->setText(login.replace(" ", ""));
+        fill_available_trips_for_user_menu();
+    } else {
+        ui->loginOccupiedExceptionLabel->show();
+    }
+}
+
+void MainWindow::fill_available_trips_for_user_menu()
+{
+    ui->findTripFromComboBox->clear();
+    ui->findTripToComboBox->clear();
+
+    std::vector<Car<void> > * cars = stateMachine->get_cars_vector();
+    if (cars->size() > 0)
+    {
+        QStringList from;
+        QStringList to;
+        QString current_from;
+        for (auto carIterator = cars->begin(); carIterator != cars->end(); ++carIterator)
+        {
+            if (carIterator->get_passengers()->size() < 3 && carIterator->get_state_id() == 2)
+            {
+                if (from.size() == 0)
+                {
+                    current_from = QString::fromStdString(carIterator->get_from());
+                }
+
+                if (carIterator->get_from().compare(current_from.toStdString()) == 0)
+                {
+                    to.push_back(QString::fromStdString(carIterator->get_to()));
+                }
+
+                from.push_back(QString::fromStdString(carIterator->get_from()));
+            }
+        }
+
+        if (from.size() == 0)
+        {
+            ui->findTripFromComboBox->setEnabled(false);
+            ui->findTripToComboBox->setEnabled(false);
+            ui->chooseTripPushButton->setEnabled(false);
+
+            ui->findTripSubheaderLabel->hide();
+            ui->findTripNotAvailableSubheaderLabel->show();
+        } else {
+            ui->findTripFromComboBox->setEnabled(true);
+            ui->findTripToComboBox->setEnabled(true);
+            ui->chooseTripPushButton->setEnabled(true);
+
+            ui->findTripSubheaderLabel->show();
+            ui->findTripNotAvailableSubheaderLabel->hide();
+
+            ui->findTripToComboBox->addItems(to.toSet().toList());
+            ui->findTripFromComboBox->addItems(from.toSet().toList());
+            ui->findTripFromComboBox->setCurrentText(current_from);
+        }
+    } else {
+        ui->findTripFromComboBox->setEnabled(false);
+        ui->findTripToComboBox->setEnabled(false);
+        ui->chooseTripPushButton->setEnabled(false);
+        ui->findTripSubheaderLabel->hide();
+        ui->findTripNotAvailableSubheaderLabel->show();
+    }
+}
+
+void MainWindow::on_findTripFromComboBox_activated(const QString &arg1)
+{
+    ui->findTripFromComboBox->clear();
+    ui->findTripToComboBox->clear();
+
+    std::vector<Car<void> > * cars = stateMachine->get_cars_vector();
+
+    QStringList from;
+    QStringList to;
+    for (auto carIterator = cars->begin(); carIterator != cars->end(); ++carIterator)
+    {
+        if (carIterator->get_passengers()->size() < 3)
+        {
+            if (arg1.compare(QString::fromStdString(carIterator->get_from())) == 0)
+            {
+                to.push_back(QString::fromStdString(carIterator->get_to()));
+            }
+            from.push_back(QString::fromStdString(carIterator->get_from()));
+        }
+    }
+
+    ui->findTripToComboBox->addItems(to.toSet().toList());
+    ui->findTripFromComboBox->addItems(from.toSet().toList());
+    ui->findTripFromComboBox->setCurrentText(arg1);
+}
+
+void MainWindow::on_chooseTripPushButton_clicked()
+{
+    QString from = ui->findTripFromComboBox->currentText();
+    QString to = ui->findTripToComboBox->currentText();
+    std::vector<Car<void> > * cars = stateMachine->get_cars_vector();
+    for (auto carIterator = cars->begin(); carIterator != cars->end(); ++carIterator)
+    {
+        if (carIterator->get_passengers()->size() < 3 && carIterator->get_from().compare(from.toStdString()) == 0 && carIterator->get_to().compare(to.toStdString()) == 0)
+        {
+            Passenger passenger(ui->userLoginLabel->text().toStdString(), stateMachine->find_first_substate_in_on_the_way_superstate());
+            carIterator->get_passengers()->push_back(passenger);
+
+            ui->userMenuWidget->hide();
+            ui->userCommitedWidget->show();
+
+            fill_add_transitions_for_substates();
+            fill_delete_transitions_for_substates();
+            fill_car_reachable_states(1);
+            fill_free_passengers_for_substates();
+            fill_car_passengers_for_substates();
+            fill_change_passenger_state_for_substates();
+            fill_delete_car_for_substates();
+            fill_choose_car_for_substates();
+
+            ui->graphFrame->setScene(scene->drawScene());
+
+            break;
+        }
+    }
+}
+
+void MainWindow::on_tabWidget_currentChanged(int index)
+{
+    if (index == 1)
+    {
+        ui->signingInWidget->show();
+        ui->userMenuWidget->hide();
+        ui->userCommitedWidget->hide();
+        ui->loginOccupiedExceptionLabel->hide();
+        ui->signingInLoginInputField->clear();
+
+        fill_add_transitions_for_substates();
+        fill_delete_transitions_for_substates();
+        fill_car_reachable_states(1);
+        fill_free_passengers_for_substates();
+        fill_car_passengers_for_substates();
+        fill_change_passenger_state_for_substates();
+        fill_delete_car_for_substates();
+        fill_choose_car_for_substates();
+
+        ui->graphFrame->setScene(scene->drawScene());
+    }
+}
+
+void MainWindow::on_goToLoginFromCongratulationsPushButton_clicked()
+{
+    ui->signingInWidget->show();
+    ui->userMenuWidget->hide();
+    ui->userCommitedWidget->hide();
+    ui->loginOccupiedExceptionLabel->hide();
+    ui->signingInLoginInputField->clear();
+}
+
+void MainWindow::on_goToLoginFromUserMenuPushButton_clicked()
+{
+    ui->signingInWidget->show();
+    ui->userMenuWidget->hide();
+    ui->userCommitedWidget->hide();
+    ui->loginOccupiedExceptionLabel->hide();
+    ui->signingInLoginInputField->clear();
 }

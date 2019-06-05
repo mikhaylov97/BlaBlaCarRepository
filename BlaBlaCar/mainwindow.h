@@ -30,6 +30,7 @@ public:
     void fill_car_reachable_states(int car_id);
     void fill_choose_car_for_substates();
     void fill_delete_car_for_substates();
+    void fill_available_trips_for_user_menu();
     ~MainWindow();
     StateMachineBlaBlaCar::StateMachine<std::string, StateMachineBlaBlaCar::Allocator<std::string>> * stateMachine;
     StateMachineBlaBlaCar::Scene* scene;
@@ -78,6 +79,18 @@ private slots:
     void on_addCarPushButton_clicked();
 
     void on_deleteCarPushButton_clicked();
+
+    void on_signingInPushButton_clicked();
+
+    void on_findTripFromComboBox_activated(const QString &arg1);
+
+    void on_chooseTripPushButton_clicked();
+
+    void on_tabWidget_currentChanged(int index);
+
+    void on_goToLoginFromCongratulationsPushButton_clicked();
+
+    void on_goToLoginFromUserMenuPushButton_clicked();
 
 private:
     Ui::MainWindow *ui;

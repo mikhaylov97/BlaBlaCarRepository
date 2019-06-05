@@ -21,18 +21,365 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
+      <y>10</y>
       <width>1651</width>
       <height>691</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="userTab">
      <attribute name="title">
       <string>User</string>
      </attribute>
+     <widget class="QWidget" name="userMenuWidget" native="true">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1011</width>
+        <height>661</height>
+       </rect>
+      </property>
+      <widget class="QLabel" name="label_40">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>80</y>
+         <width>91</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size:18px</string>
+       </property>
+       <property name="text">
+        <string>Your login:</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="userLoginLabel">
+       <property name="geometry">
+        <rect>
+         <x>150</x>
+         <y>80</y>
+         <width>151</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size:18px</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="findTripFromComboBox">
+       <property name="geometry">
+        <rect>
+         <x>310</x>
+         <y>170</y>
+         <width>111</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_44">
+       <property name="geometry">
+        <rect>
+         <x>270</x>
+         <y>170</y>
+         <width>47</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>From:</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_45">
+       <property name="geometry">
+        <rect>
+         <x>310</x>
+         <y>70</y>
+         <width>421</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size:30px</string>
+       </property>
+       <property name="text">
+        <string>BlaBlaCar International Service</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="findTripSubheaderLabel">
+       <property name="geometry">
+        <rect>
+         <x>220</x>
+         <y>140</y>
+         <width>571</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size:18px</string>
+       </property>
+       <property name="text">
+        <string>Find trip which will be suitable for you by selecting FROM and TO value</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_47">
+       <property name="geometry">
+        <rect>
+         <x>450</x>
+         <y>170</y>
+         <width>47</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>To:</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="findTripToComboBox">
+       <property name="geometry">
+        <rect>
+         <x>480</x>
+         <y>170</y>
+         <width>131</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="chooseTripPushButton">
+       <property name="geometry">
+        <rect>
+         <x>640</x>
+         <y>170</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Choose</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="findTripNotAvailableSubheaderLabel">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>140</y>
+         <width>671</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size:18px</string>
+       </property>
+       <property name="text">
+        <string>Here you could find any suitable trip, but at the moment there are no available cars</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="goToLoginFromUserMenuPushButton">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>120</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Go to login</string>
+       </property>
+      </widget>
+      <zorder>label_40</zorder>
+      <zorder>userLoginLabel</zorder>
+      <zorder>findTripFromComboBox</zorder>
+      <zorder>label_44</zorder>
+      <zorder>label_45</zorder>
+      <zorder>label_47</zorder>
+      <zorder>findTripToComboBox</zorder>
+      <zorder>chooseTripPushButton</zorder>
+      <zorder>findTripNotAvailableSubheaderLabel</zorder>
+      <zorder>findTripSubheaderLabel</zorder>
+      <zorder>goToLoginFromUserMenuPushButton</zorder>
+     </widget>
+     <widget class="QWidget" name="signingInWidget" native="true">
+      <property name="geometry">
+       <rect>
+        <x>-1</x>
+        <y>-1</y>
+        <width>1011</width>
+        <height>651</height>
+       </rect>
+      </property>
+      <widget class="QPushButton" name="signingInPushButton">
+       <property name="geometry">
+        <rect>
+         <x>460</x>
+         <y>360</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Sign in</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_42">
+       <property name="geometry">
+        <rect>
+         <x>330</x>
+         <y>273</y>
+         <width>381</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size:16px;</string>
+       </property>
+       <property name="text">
+        <string>Here you can sign in and commit to any suitable trip.</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="signingInLoginInputField">
+       <property name="geometry">
+        <rect>
+         <x>470</x>
+         <y>310</y>
+         <width>161</width>
+         <height>20</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_41">
+       <property name="geometry">
+        <rect>
+         <x>470</x>
+         <y>240</y>
+         <width>111</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size:20px</string>
+       </property>
+       <property name="text">
+        <string>Hi there!</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_39">
+       <property name="geometry">
+        <rect>
+         <x>380</x>
+         <y>310</y>
+         <width>101</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Enter your login:</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="loginOccupiedExceptionLabel">
+       <property name="geometry">
+        <rect>
+         <x>380</x>
+         <y>340</y>
+         <width>291</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: red</string>
+       </property>
+       <property name="text">
+        <string>Such login is already occupied! Please, try another one!</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_43">
+       <property name="geometry">
+        <rect>
+         <x>310</x>
+         <y>50</y>
+         <width>491</width>
+         <height>71</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size: 30px</string>
+       </property>
+       <property name="text">
+        <string>BlaBlaCar International Service</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="userCommitedWidget" native="true">
+      <property name="geometry">
+       <rect>
+        <x>-1</x>
+        <y>-1</y>
+        <width>1011</width>
+        <height>651</height>
+       </rect>
+      </property>
+      <widget class="QLabel" name="label_46">
+       <property name="geometry">
+        <rect>
+         <x>340</x>
+         <y>240</y>
+         <width>441</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size:18px;</string>
+       </property>
+       <property name="text">
+        <string>You are successfully commited to the trip!</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_48">
+       <property name="geometry">
+        <rect>
+         <x>400</x>
+         <y>200</y>
+         <width>311</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size:30px</string>
+       </property>
+       <property name="text">
+        <string>Congratulations!</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="goToLoginFromCongratulationsPushButton">
+       <property name="geometry">
+        <rect>
+         <x>460</x>
+         <y>300</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Go to login</string>
+       </property>
+      </widget>
+     </widget>
+     <zorder>userCommitedWidget</zorder>
+     <zorder>signingInWidget</zorder>
+     <zorder>userMenuWidget</zorder>
     </widget>
     <widget class="QWidget" name="adminTab">
      <attribute name="title">
