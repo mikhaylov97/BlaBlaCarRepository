@@ -24,60 +24,54 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->userMenuWidget->hide();
     ui->userCommitedWidget->hide();
 
-    for(auto stateIterator = stateMachine->get_states_vector()->begin(); stateIterator != stateMachine->get_states_vector()->end(); ++stateIterator)
+//    for(auto stateIterator = stateMachine->get_states_vector()->begin(); stateIterator != stateMachine->get_states_vector()->end(); ++stateIterator)
+//    {
+//        ui->addTransitionFromComboBox->addItem(QString::fromStdString(stateIterator->get_value()));
+//        ui->addTransitionToComboBox->addItem(QString::fromStdString(stateIterator->get_value()));
+//    }
+
+//    for(auto transitionIterator = stateMachine->get_transitions_vector()->begin(); transitionIterator != stateMachine->get_transitions_vector()->end(); ++transitionIterator)
+//    {
+//        ui->deleteTransitionFromComboBox->addItem(QString::fromStdString(transitionIterator->get_initial_state().get_value()));
+//        ui->deleteTransitionToComboBox->addItem(QString::fromStdString(transitionIterator->get_final_state().get_value()));
+//    }
+
+//    for(auto carIterator = stateMachine->get_cars_vector()->begin(); carIterator != stateMachine->get_cars_vector()->end(); ++carIterator)
+//    {
+//        QString car_string;
+//        ui->chooseCarComboBox->addItem(car_string.append("id: ").append(QString::number(carIterator->get_id())).append(", From: ").append(QString::fromStdString(carIterator->get_from())).append(", To: ").append(QString::fromStdString(carIterator->get_to())));
+//        if (carIterator == stateMachine->get_cars_vector()->begin())
+//        {
+//            State<std::string> state = stateMachine->find_state_by_id(carIterator->get_state_id());
+//            ui->changeCarActiveStateComboBox->addItem(QString::fromStdString(state.get_value()));
+//            std::vector<State<std::string>> reachable_states = stateMachine->get_reachable_states_from_current(state);
+//            for(auto rsIterator = reachable_states.begin(); rsIterator != reachable_states.end(); ++rsIterator)
+//            {
+//               ui->changeCarActiveStateComboBox->addItem(QString::fromStdString(rsIterator->get_value()));
+//            }
+//        }
+//    }
+
+    fill_delete_state_for_superstates();
+    fill_add_transitions_for_superstates();
+    fill_delete_transitions_for_superstates();
+    if (stateMachine->get_cars_vector()->size() > 0)
     {
-        ui->deleteStateComboBox->addItem(QString::fromStdString(stateIterator->get_value()));
-        ui->addTransitionFromComboBox->addItem(QString::fromStdString(stateIterator->get_value()));
-        ui->addTransitionToComboBox->addItem(QString::fromStdString(stateIterator->get_value()));
-        ui->addStateCarSpecificStateComboBox->addItem(QString::fromStdString(stateIterator->get_value()));
-        if (stateIterator->get_states()->size() != 0)
-        {
-            ui->deleteStateCarSpecificStateComboBox->addItem(QString::fromStdString(stateIterator->get_value()));
-            if (ui->deleteStateCarSpecificComboBox->count() == 0)
-            {
-                for(auto substatesIterator = stateIterator->get_states()->begin(); substatesIterator != stateIterator->get_states()->end(); ++substatesIterator)
-                {
-                    ui->deleteStateCarSpecificComboBox->addItem(QString::fromStdString(substatesIterator->get_value()));
-                }
-            }
-        }
-    }
-    if (ui->deleteStateCarSpecificComboBox->count() == 0)
-    {
-        ui->deleteStateCarSpecificStateComboBox->clear();
-        ui->deleteStateCarSpecificStateComboBox->setEnabled(false);
-        ui->deleteStateCarSpecificComboBox->setEnabled(false);
-        ui->deleteStateCarSpecificPushButton->setEnabled(false);
+        fill_car_reachable_states(1);
+        fill_choose_car_for_substates();
+
+        fill_add_state_for_substates();
+        fill_delete_state_for_substates();
+        fill_add_transitions_for_substates();
+        fill_delete_transitions_for_substates();
+        fill_free_passengers_for_substates();
+        fill_car_passengers_for_substates();
+        fill_change_passenger_state_for_substates();
+        fill_delete_car_for_substates();
+    } else {
+        ui->carSpecificTab->setEnabled(false);
     }
 
-    for(auto transitionIterator = stateMachine->get_transitions_vector()->begin(); transitionIterator != stateMachine->get_transitions_vector()->end(); ++transitionIterator)
-    {
-        ui->deleteTransitionFromComboBox->addItem(QString::fromStdString(transitionIterator->get_initial_state().get_value()));
-        ui->deleteTransitionToComboBox->addItem(QString::fromStdString(transitionIterator->get_final_state().get_value()));
-    }
-
-    for(auto carIterator = stateMachine->get_cars_vector()->begin(); carIterator != stateMachine->get_cars_vector()->end(); ++carIterator)
-    {
-        QString car_string;
-        ui->chooseCarComboBox->addItem(car_string.append("id: ").append(QString::number(carIterator->get_id())).append(", From: ").append(QString::fromStdString(carIterator->get_from())).append(", To: ").append(QString::fromStdString(carIterator->get_to())));
-        if (carIterator == stateMachine->get_cars_vector()->begin())
-        {
-            State<std::string> state = stateMachine->find_state_by_id(carIterator->get_state_id());
-            ui->changeCarActiveStateComboBox->addItem(QString::fromStdString(state.get_value()));
-            std::vector<State<std::string>> reachable_states = stateMachine->get_reachable_states_from_current(state);
-            for(auto rsIterator = reachable_states.begin(); rsIterator != reachable_states.end(); ++rsIterator)
-            {
-               ui->changeCarActiveStateComboBox->addItem(QString::fromStdString(rsIterator->get_value()));
-            }
-        }
-    }
-
-    fill_add_transitions_for_substates();
-    fill_delete_transitions_for_substates();
-    fill_free_passengers_for_substates();
-    fill_car_passengers_for_substates();
-    fill_change_passenger_state_for_substates();
-    fill_delete_car_for_substates();
 
     scene = new Scene(stateMachine, ui);
     ui->graphFrame->setScene(scene->drawScene());
@@ -188,78 +182,153 @@ void MainWindow::fill_add_transitions_for_substates_by_default()
 void MainWindow::on_addStatePushButton_clicked()
 {
     QString stateName = ui->addStateNameInputField->text();
-    stateMachine->add_state(stateName.toStdString());
-    ui->deleteStateComboBox->addItem(stateName);
-    ui->addTransitionFromComboBox->addItem(stateName);
-    ui->addTransitionToComboBox->addItem(stateName);
-    ui->deleteTransitionFromComboBox->addItem(stateName);
-    ui->deleteTransitionToComboBox->addItem(stateName);
-    ui->addStateNameInputField->clear();
-    QMessageBox::information(0, "INFO", "State added!");
+    if (stateName.isEmpty())
+    {
+        QMessageBox::information(0, "INFO", "State cannot be added! State name input field is empty!");
+    } else {
+        stateMachine->add_state(stateName.replace(" ", "").toStdString());
 
-    ui->graphFrame->setScene(scene->drawScene());
+        ui->addTransitionFromComboBox->addItem(stateName);
+        ui->addTransitionToComboBox->addItem(stateName);
+        ui->deleteTransitionFromComboBox->addItem(stateName);
+        ui->deleteTransitionToComboBox->addItem(stateName);
+
+        QMessageBox::information(0, "INFO", "State was successfully added!");
+
+        ui->addStateNameInputField->clear();
+
+        fill_delete_state_for_superstates();
+        fill_add_transitions_for_superstates();
+        fill_delete_transitions_for_superstates();
+        if (stateMachine->get_cars_vector()->size() > 0)
+        {
+            fill_add_state_for_substates();
+            fill_delete_state_for_substates();
+            fill_add_transitions_for_substates();
+            fill_delete_transitions_for_substates();
+            fill_free_passengers_for_substates();
+            fill_car_passengers_for_substates();
+            fill_change_passenger_state_for_substates();
+            fill_delete_car_for_substates();
+            fill_car_reachable_states(1);
+
+            ui->graphFrame->setScene(scene->drawScene());
+        } else {
+            ui->graphFrame->setScene(scene->drawClearScene());
+        }
+
+
+    }
 }
 
 void MainWindow::on_deleteStatePushButton_clicked()
 {
     int current_index_state = ui->deleteStateComboBox->currentIndex();
-    QString current_state_name = ui->deleteStateComboBox->currentText();
-    State<std::string> current_state_obj = stateMachine->find_state_by_name(current_state_name.toStdString());
-    if (current_state_obj.get_id() == 3 || current_state_obj.get_id() == 2 || current_state_obj.get_id() == 4)
+    QString current_state = ui->deleteStateComboBox->currentText();
+    State<std::string> current_state_obj = stateMachine->find_state_by_name(current_state.toStdString());
+    if (!stateMachine->is_superstate_can_be_deleted(current_state.toStdString()))
+    {
+        QMessageBox::information(0, "INFO", "That state cannot be deleted! Some cars have it as active!");
+    } else if (current_state_obj.get_id() == 3 || current_state_obj.get_id() == 2 || current_state_obj.get_id() == 4)
     {
         QMessageBox::information(0, "INFO", "That state cannot be deleted! It's important to app business logic!");
     } else {
-        stateMachine->delete_state(current_state_name.toStdString());
-        ui->deleteStateComboBox->removeItem(current_index_state);
+        stateMachine->delete_state(current_state.toStdString());
 
-    //    int current_index_add_transition_from = ui->addTransitionFromComboBox->currentIndex();
-    //    ui->addTransitionFromComboBox->removeItem(current_index_add_transition_from);
-    //    int current_index_add_transition_to = ui->addTransitionToComboBox->currentIndex();
-    //    ui->addTransitionToComboBox->removeItem(current_index_add_transition_to);
+        QMessageBox::information(0, "INFO", "Superstate was successfully deleted!");
 
-        QMessageBox::information(0, "INFO", "State deleted!");
+        fill_delete_state_for_superstates();
+        fill_add_transitions_for_superstates();
+        fill_delete_transitions_for_superstates();
+        if (stateMachine->get_cars_vector()->size() > 0)
+        {
+            fill_add_state_for_substates();
+            fill_delete_state_for_substates();
+            fill_add_transitions_for_substates();
+            fill_delete_transitions_for_substates();
+            fill_free_passengers_for_substates();
+            fill_car_passengers_for_substates();
+            fill_change_passenger_state_for_substates();
+            fill_delete_car_for_substates();
+            fill_car_reachable_states(1);
 
-        ui->graphFrame->setScene(scene->drawScene());
+            ui->graphFrame->setScene(scene->drawScene());
+        } else {
+            ui->graphFrame->setScene(scene->drawClearScene());
+        }
     }
 }
 
 void MainWindow::on_addTransitionPushButton_clicked()
 {
-    int current_index_from = ui->addTransitionFromComboBox->currentIndex();
     QString current_state_name_from = ui->addTransitionFromComboBox->currentText();
     State<std::string> initial_state = stateMachine->find_state_by_name(current_state_name_from.toStdString());
 
-    int current_index_to = ui->addTransitionToComboBox->currentIndex();
     QString current_state_name_to = ui->addTransitionToComboBox->currentText();
     State<std::string> final_state = stateMachine->find_state_by_name(current_state_name_to.toStdString());
 
-    QString action = ui->addTransitionActionInputField->text();
+    QString action = ui->addTransitionActionInputField->text().replace(" ", "");
 
     stateMachine->add_transition(initial_state.get_id(), final_state.get_id(), action.toStdString(), false);
+
+    QMessageBox::information(0, "INFO", "Transition was successfully added!");
+
     ui->addTransitionActionInputField->clear();
 
-    QMessageBox::information(0, "INFO", "Transition added!");
+    fill_delete_state_for_superstates();
+    fill_add_transitions_for_superstates();
+    fill_delete_transitions_for_superstates();
+    if (stateMachine->get_cars_vector()->size() > 0)
+    {
+        fill_add_state_for_substates();
+        fill_delete_state_for_substates();
+        fill_add_transitions_for_substates();
+        fill_delete_transitions_for_substates();
+        fill_free_passengers_for_substates();
+        fill_car_passengers_for_substates();
+        fill_change_passenger_state_for_substates();
+        fill_delete_car_for_substates();
+        fill_car_reachable_states(1);
 
-    ui->graphFrame->setScene(scene->drawScene());
+        ui->graphFrame->setScene(scene->drawScene());
+    } else {
+        ui->graphFrame->setScene(scene->drawClearScene());
+    }
 }
 
 void MainWindow::on_deleteTransitionPushButton_clicked()
 {
-    int current_index_from = ui->deleteTransitionFromComboBox->currentIndex();
     QString current_state_name_from = ui->deleteTransitionFromComboBox->currentText();
     State<std::string> initial_state = stateMachine->find_state_by_name(current_state_name_from.toStdString());
-    ui->deleteTransitionFromComboBox->removeItem(current_index_from);
 
-    int current_index_to = ui->deleteTransitionToComboBox->currentIndex();
     QString current_state_name_to = ui->deleteTransitionToComboBox->currentText();
     State<std::string> final_state = stateMachine->find_state_by_name(current_state_name_to.toStdString());
-    ui->deleteTransitionToComboBox->removeItem(current_index_to);
 
     stateMachine->delete_transition(initial_state.get_id(), final_state.get_id());
 
-    QMessageBox::information(0, "INFO", "Transition deleted!");
+    QMessageBox::information(0, "INFO", "Transition was successfully deleted!");
 
-    ui->graphFrame->setScene(scene->drawScene());
+    fill_delete_state_for_superstates();
+    fill_add_transitions_for_superstates();
+    fill_delete_transitions_for_superstates();
+    if (stateMachine->get_cars_vector()->size() > 0)
+    {
+        fill_car_reachable_states(1);
+        fill_choose_car_for_substates();
+
+        fill_add_state_for_substates();
+        fill_delete_state_for_substates();
+        fill_add_transitions_for_substates();
+        fill_delete_transitions_for_substates();
+        fill_free_passengers_for_substates();
+        fill_car_passengers_for_substates();
+        fill_change_passenger_state_for_substates();
+        fill_delete_car_for_substates();
+
+        ui->graphFrame->setScene(scene->drawScene());
+    } else {
+        ui->graphFrame->setScene(scene->drawClearScene());
+    }
 }
 
 void MainWindow::on_checkStatesReachabilityPushButton_clicked()
@@ -1328,4 +1397,287 @@ void MainWindow::on_goToLoginFromUserMenuPushButton_clicked()
     ui->userCommitedWidget->hide();
     ui->loginOccupiedExceptionLabel->hide();
     ui->signingInLoginInputField->clear();
+}
+
+void MainWindow::fill_delete_state_for_superstates()
+{
+    ui->deleteStateComboBox->clear();
+    ui->deleteStateComboBox->setEnabled(true);
+    ui->deleteStatePushButton->setEnabled(true);
+
+    for (auto stateIterator = stateMachine->get_states_vector()->begin(); stateIterator != stateMachine->get_states_vector()->end(); ++stateIterator)
+    {
+       if (stateIterator->get_id() != 2 && stateIterator->get_id() != 3 && stateIterator->get_id() != 4)
+       {
+           ui->deleteStateComboBox->addItem(QString::fromStdString(stateIterator->get_value()));
+       }
+    }
+
+    if (ui->deleteStateComboBox->count() == 0)
+    {
+        ui->deleteStateComboBox->setEnabled(false);
+        ui->deleteStatePushButton->setEnabled(false);
+    }
+}
+void MainWindow::fill_add_state_for_substates()
+{
+    ui->addStateCarSpecificStateComboBox->clear();
+
+    for (auto stateIterator = stateMachine->get_states_vector()->begin(); stateIterator != stateMachine->get_states_vector()->end(); ++stateIterator)
+    {
+        ui->addStateCarSpecificStateComboBox->addItem(QString::fromStdString(stateIterator->get_value()));
+    }
+}
+
+void MainWindow::fill_delete_state_for_substates()
+{
+    ui->deleteStateCarSpecificStateComboBox->clear();
+    ui->deleteStateCarSpecificComboBox->clear();
+
+    ui->deleteStateCarSpecificStateComboBox->setEnabled(true);
+    ui->deleteStateCarSpecificComboBox->setEnabled(true);
+    ui->deleteStateCarSpecificPushButton->setEnabled(true);
+
+    for(auto stateIterator = stateMachine->get_states_vector()->begin(); stateIterator != stateMachine->get_states_vector()->end(); ++stateIterator)
+    {
+        if (stateIterator->get_states()->size() > 0)
+        {
+            ui->deleteStateCarSpecificStateComboBox->addItem(QString::fromStdString(stateIterator->get_value()));
+            if (ui->deleteStateCarSpecificComboBox->count() == 0)
+            {
+                for(auto substatesIterator = stateIterator->get_states()->begin(); substatesIterator != stateIterator->get_states()->end(); ++substatesIterator)
+                {
+                    ui->deleteStateCarSpecificComboBox->addItem(QString::fromStdString(substatesIterator->get_value()));
+                }
+            }
+        }
+    }
+
+    if (ui->deleteStateCarSpecificComboBox->count() == 0)
+    {
+        ui->deleteStateCarSpecificStateComboBox->clear();
+
+        ui->deleteStateCarSpecificStateComboBox->setEnabled(false);
+        ui->deleteStateCarSpecificComboBox->setEnabled(false);
+        ui->deleteStateCarSpecificPushButton->setEnabled(false);
+    }
+}
+
+void MainWindow::fill_add_transitions_for_superstates()
+{
+    ui->addTransitionFromComboBox->clear();
+    ui->addTransitionToComboBox->clear();
+
+    QStringList combobox_from;
+    QStringList combobox_to;
+    QString active_from;
+    for(auto stateIterator = stateMachine->get_states_vector()->begin(); stateIterator != stateMachine->get_states_vector()->end(); ++stateIterator)
+    {
+        std::vector<Transition<std::string>> transitions = stateMachine->find_all_transitions_except_substate_transitions();
+        int state_id = stateIterator->get_id();
+        for(auto innerStateIterator = stateMachine->get_states_vector()->begin(); innerStateIterator != stateMachine->get_states_vector()->end(); ++innerStateIterator)
+        {
+            State<std::string> inner_state = *innerStateIterator;
+            int inner_state_id = inner_state.get_id();
+            if (state_id != inner_state_id) {
+                auto t = std::find_if(
+                            transitions.begin(),
+                            transitions.end(),
+                            [&state_id,&inner_state_id](Transition<std::string> t) { return t.get_initial_state().get_id() == state_id && t.get_final_state().get_id() == inner_state_id;}
+                            );
+                if (t == transitions.end())
+                {
+                    combobox_from.push_back(QString::fromStdString(stateIterator->get_value()));
+                    if (ui->addTransitionToComboBox->count() == 0)
+                    {
+                        active_from = QString::fromStdString(stateIterator->get_value());
+                        combobox_to.push_back(QString::fromStdString(innerStateIterator->get_value()));
+                    }
+                }
+            }
+        }
+
+        if (combobox_to.size() > 0 && ui->addTransitionToComboBox->count() == 0)
+        {
+            ui->addTransitionToComboBox->addItems(combobox_to.toSet().toList());
+        }
+    }
+
+    if (combobox_from.size() > 0) {
+        ui->addTransitionFromComboBox->addItems(combobox_from.toSet().toList());
+    }
+
+
+    if (combobox_from.size() == 0)
+    {
+        ui->addTransitionFromComboBox->setEnabled(false);
+        ui->addTransitionToComboBox->setEnabled(false);
+        ui->addTransitionPushButton->setEnabled(false);
+        ui->addTransitionActionInputField->setEnabled(false);
+    } else {
+        ui->addTransitionFromComboBox->setCurrentText(active_from);
+
+        ui->addTransitionFromComboBox->setEnabled(true);
+        ui->addTransitionToComboBox->setEnabled(true);
+        ui->addTransitionPushButton->setEnabled(true);
+        ui->addTransitionActionInputField->setEnabled(true);
+    }
+}
+
+void MainWindow::fill_add_transitions_for_superstates(QString from)
+{
+    ui->addTransitionFromComboBox->clear();
+    ui->addTransitionToComboBox->clear();
+
+    QStringList combobox_from;
+    QStringList combobox_to;
+    QString active_from;
+    for(auto stateIterator = stateMachine->get_states_vector()->begin(); stateIterator != stateMachine->get_states_vector()->end(); ++stateIterator)
+    {
+        std::vector<Transition<std::string>> transitions = stateMachine->find_all_transitions_except_substate_transitions();
+        int state_id = stateIterator->get_id();
+        for(auto innerStateIterator = stateMachine->get_states_vector()->begin(); innerStateIterator != stateMachine->get_states_vector()->end(); ++innerStateIterator)
+        {
+            State<std::string> inner_state = *innerStateIterator;
+            int inner_state_id = inner_state.get_id();
+            if (state_id != inner_state_id) {
+                auto t = std::find_if(
+                            transitions.begin(),
+                            transitions.end(),
+                            [&state_id,&inner_state_id](Transition<std::string> t) { return t.get_initial_state().get_id() == state_id && t.get_final_state().get_id() == inner_state_id;}
+                            );
+                if (t == transitions.end())
+                {
+                    combobox_from.push_back(QString::fromStdString(stateIterator->get_value()));
+                    if (stateIterator->get_value().compare(from.toStdString()) == 0)
+                    {
+                        combobox_to.push_back(QString::fromStdString(innerStateIterator->get_value()));
+                    }
+                }
+            }
+        }
+
+        if (combobox_to.size() > 0 && ui->addTransitionToComboBox->count() == 0)
+        {
+            ui->addTransitionToComboBox->addItems(combobox_to.toSet().toList());
+        }
+    }
+
+    if (combobox_from.size() > 0) {
+        ui->addTransitionFromComboBox->addItems(combobox_from.toSet().toList());
+    }
+
+
+    if (combobox_from.size() == 0)
+    {
+        ui->addTransitionFromComboBox->setEnabled(false);
+        ui->addTransitionToComboBox->setEnabled(false);
+        ui->addTransitionPushButton->setEnabled(false);
+        ui->addTransitionActionInputField->setEnabled(false);
+    } else {
+        ui->addTransitionFromComboBox->setCurrentText(from);
+
+        ui->addTransitionFromComboBox->setEnabled(true);
+        ui->addTransitionToComboBox->setEnabled(true);
+        ui->addTransitionPushButton->setEnabled(true);
+        ui->addTransitionActionInputField->setEnabled(true);
+    }
+}
+
+void MainWindow::on_addTransitionFromComboBox_activated(const QString &arg1)
+{
+    fill_add_transitions_for_superstates(arg1);
+}
+
+void MainWindow::fill_delete_transitions_for_superstates()
+{
+    ui->deleteTransitionFromComboBox->clear();
+    ui->deleteTransitionToComboBox->clear();
+
+    QString from_value;
+    QStringList to_combobox;
+    QStringList from_combobox;
+
+    std::vector<Transition<std::string>> transitions = stateMachine->find_all_transitions_except_substate_transitions();
+    if (transitions.size() > 0)
+    {
+        Transition<std::string> from_transition;
+        for(auto trIterator = transitions.begin(); trIterator != transitions.end(); ++trIterator)
+        {
+            if (from_combobox.size() == 0)
+            {
+                from_value = QString::fromStdString(trIterator->get_initial_state().get_value());
+                from_transition = *trIterator;
+            }
+
+            if (trIterator->get_initial_state().get_id() == from_transition.get_initial_state().get_id())
+            {
+                to_combobox.push_back(QString::fromStdString(trIterator->get_final_state().get_value()));
+            }
+
+            from_combobox.push_back(QString::fromStdString(trIterator->get_initial_state().get_value()));
+        }
+    }
+
+    if (from_combobox.size() > 0 && to_combobox.size() > 0) {
+        ui->deleteTransitionFromComboBox->addItems(from_combobox.toSet().toList());
+        ui->deleteTransitionToComboBox->addItems(to_combobox.toSet().toList());
+        ui->deleteTransitionFromComboBox->setEnabled(true);
+        ui->deleteTransitionToComboBox->setEnabled(true);
+        ui->deleteTransitionPushButton->setEnabled(true);
+        ui->deleteTransitionFromComboBox->setCurrentText(from_value);
+    } else {
+        ui->deleteTransitionFromComboBox->setEnabled(false);
+        ui->deleteTransitionToComboBox->setEnabled(false);
+        ui->deleteTransitionPushButton->setEnabled(false);
+    }
+}
+
+void MainWindow::fill_delete_transitions_for_superstates(QString from)
+{
+    ui->deleteTransitionFromComboBox->clear();
+    ui->deleteTransitionToComboBox->clear();
+
+    QString from_value;
+    QStringList to_combobox;
+    QStringList from_combobox;
+
+    State<std::string> state = stateMachine->find_state_by_name(from.toStdString());
+    std::vector<Transition<std::string>> transitions = stateMachine->find_all_transitions_except_substate_transitions();
+    if (transitions.size() > 0)
+    {
+        Transition<std::string> from_transition;
+        for(auto trIterator = transitions.begin(); trIterator != transitions.end(); ++trIterator)
+        {
+            if (trIterator->get_initial_state().get_id() == state.get_id())
+            {
+                from_value = QString::fromStdString(trIterator->get_initial_state().get_value());
+                from_transition = *trIterator;
+            }
+
+            if (trIterator->get_initial_state().get_id() == from_transition.get_initial_state().get_id())
+            {
+                to_combobox.push_back(QString::fromStdString(trIterator->get_final_state().get_value()));
+            }
+
+            from_combobox.push_back(QString::fromStdString(trIterator->get_initial_state().get_value()));
+        }
+    }
+
+    if (from_combobox.size() > 0 && to_combobox.size() > 0) {
+        ui->deleteTransitionFromComboBox->addItems(from_combobox.toSet().toList());
+        ui->deleteTransitionToComboBox->addItems(to_combobox.toSet().toList());
+        ui->deleteTransitionFromComboBox->setEnabled(true);
+        ui->deleteTransitionToComboBox->setEnabled(true);
+        ui->deleteTransitionPushButton->setEnabled(true);
+        ui->deleteTransitionFromComboBox->setCurrentText(from);
+    } else {
+        ui->deleteTransitionFromComboBox->setEnabled(false);
+        ui->deleteTransitionToComboBox->setEnabled(false);
+        ui->deleteTransitionPushButton->setEnabled(false);
+    }
+}
+void MainWindow::on_deleteTransitionFromComboBox_activated(const QString &arg1)
+{
+    fill_delete_transitions_for_superstates(arg1);
 }

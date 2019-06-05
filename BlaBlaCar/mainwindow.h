@@ -17,14 +17,26 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
+
+    void fill_delete_state_for_superstates();
+    void fill_add_transitions_for_superstates();
+    void fill_add_transitions_for_superstates(QString from);
+    void fill_delete_transitions_for_superstates();
+    void fill_delete_transitions_for_superstates(QString from);
+
+    void fill_add_state_for_substates();
+    void fill_delete_state_for_substates();
+
     void fill_add_transitions_for_substates_by_default();
     void fill_delete_transitions_for_substates_by_default();
-    void fill_free_passengers_for_substates();
-    void fill_car_passengers_for_substates();
-    void fill_delete_transitions_for_substates();
+
     void fill_add_transitions_for_substates();
     void fill_add_transitions_for_substates(QString state_name);
+    void fill_delete_transitions_for_substates();
     void fill_delete_transitions_for_substates(QString state_name);
+
+    void fill_free_passengers_for_substates();
+    void fill_car_passengers_for_substates();
     void fill_change_passenger_state_for_substates();
     void fill_car_reachable_states();
     void fill_car_reachable_states(int car_id);
@@ -91,6 +103,10 @@ private slots:
     void on_goToLoginFromCongratulationsPushButton_clicked();
 
     void on_goToLoginFromUserMenuPushButton_clicked();
+
+    void on_addTransitionFromComboBox_activated(const QString &arg1);
+
+    void on_deleteTransitionFromComboBox_activated(const QString &arg1);
 
 private:
     Ui::MainWindow *ui;

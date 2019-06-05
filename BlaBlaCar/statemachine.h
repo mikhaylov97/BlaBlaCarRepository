@@ -430,6 +430,36 @@ namespace StateMachineBlaBlaCar
             return *substate;
         }
 
+        std::vector<Transition<T>> find_all_transitions_except_substate_transitions()
+        {
+            std::vector<Transition<T>> * result_transitions = new std::vector<Transition<T>>();
+            for (auto tIterator = transitions.begin(); tIterator != transitions.end(); ++tIterator)
+            {
+                bool is_substate_transition = false;
+                for (auto stateIterator = states.begin(); stateIterator != states.end(); ++stateIterator)
+                {
+                    if (stateIterator->get_states()->size() > 1)
+                    {
+                        for (auto substateIterator = stateIterator->get_states()->begin(); substateIterator != stateIterator->get_states()->end(); ++substateIterator)
+                        {
+                            int substate_id = substateIterator->get_id();
+                            if (tIterator->get_initial_state().get_id() == substate_id || tIterator->get_final_state().get_id() == substate_id)
+                            {
+                                is_substate_transition = true;
+                                break;
+                            }
+                        }
+                        if (is_substate_transition) break;
+                    }
+                }
+                if (!is_substate_transition)
+                {
+                    result_transitions->push_back(*tIterator);
+                }
+            }
+
+            return *result_transitions;
+        }
 
         std::vector<Transition<T>> find_all_transitions_for_superstate(State<T> superstate)
         {
@@ -468,6 +498,29 @@ namespace StateMachineBlaBlaCar
             }
 
             return matches;
+        }
+
+        bool is_superstate_can_be_deleted(std::string name)
+        {
+            if (cars.size() == 0)
+            {
+                return true;
+            }
+
+            State<T> state = find_state_by_name(name);
+            int state_id = state.get_id();
+            auto car = std::find_if(
+                        cars.begin(),
+                        cars.end(),
+                        [&state_id](Car<void> car) { return car.get_state_id() == state_id; }
+            );
+
+            if (car != cars.end())
+            {
+                return false;
+            }
+
+            return true;
         }
 
         void add_state(State<T> state) throw(StateAlreadyExistsException)
