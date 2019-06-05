@@ -73,6 +73,8 @@ MainWindow::MainWindow(QWidget *parent) :
     fill_free_passengers_for_substates();
     fill_car_passengers_for_substates();
     fill_change_passenger_state_for_substates();
+    fill_delete_car_for_substates();
+
     scene = new Scene(stateMachine, ui);
     ui->graphFrame->setScene(scene->drawScene());
     Graphics_view_zoom* z = new Graphics_view_zoom(ui->graphFrame);
@@ -1042,4 +1044,112 @@ void MainWindow::on_chooseCarComboBox_activated(int index)
     fill_change_passenger_state_for_substates();
 
     ui->graphFrame->setScene(scene->drawScene());
+}
+
+void MainWindow::on_addCarPushButton_clicked()
+{
+    QString car_from = ui->addCarFromInputField->text();
+    QString car_to = ui->addCarToInputField->text();
+    if (car_from.isEmpty())
+    {
+        QMessageBox::information(0, "INFO", "Car cannot be created, FROM value is missed!");
+    } else if (car_to.isEmpty()) {
+        QMessageBox::information(0, "INFO", "Car cannot be created, TO value is missed!");
+    } else {
+        stateMachine->add_car(Car<void>(stateMachine->get_states_vector()->front().get_id(), car_from.toStdString(), car_to.toStdString()));
+        QMessageBox::information(0, "INFO", "Car from [" + car_from + "] to [" + car_to + "] was successfully added!");
+
+        ui->addCarFromInputField->clear();
+        ui->addCarToInputField->clear();
+
+        ui->carSpecificTab->setEnabled(true);
+        fill_choose_car_for_substates();
+        on_chooseCarComboBox_activated(0);
+        fill_delete_car_for_substates();
+
+        ui->graphFrame->setScene(scene->drawScene());
+    }
+}
+
+void MainWindow::fill_choose_car_for_substates()
+{
+    ui->chooseCarComboBox->clear();
+
+    std::vector<Car<void> > * cars = stateMachine->get_cars_vector();
+    for (auto carIterator = cars->begin(); carIterator != cars->end(); ++carIterator)
+    {
+        QString car_string;
+        car_string.append("id: ").append(QString::number(carIterator->get_id())).append(", From: ").append(QString::fromStdString(carIterator->get_from())).append(", To: ").append(QString::fromStdString(carIterator->get_to()));
+        ui->chooseCarComboBox->addItem(car_string);
+    }
+}
+
+void MainWindow::fill_delete_car_for_substates()
+{
+    ui->deleteCarComboBox->clear();
+
+    std::vector<Car<void> > * cars = stateMachine->get_cars_vector();
+    if (cars->size() != 0)
+    {
+        ui->deleteCarComboBox->setEnabled(true);
+        ui->deleteCarPushButton->setEnabled(true);
+        for (auto carIterator = cars->begin(); carIterator != cars->end(); ++carIterator)
+        {
+            QString car_string;
+            car_string.append("id: ").append(QString::number(carIterator->get_id())).append(", From: ").append(QString::fromStdString(carIterator->get_from())).append(", To: ").append(QString::fromStdString(carIterator->get_to()));
+            ui->deleteCarComboBox->addItem(car_string);
+        }
+    } else {
+        ui->deleteCarComboBox->setEnabled(false);
+        ui->deleteCarPushButton->setEnabled(false);
+    }
+}
+
+void MainWindow::on_deleteCarPushButton_clicked()
+{
+    Car<void> current_car = stateMachine->find_car_by_id(ui->deleteCarComboBox->currentIndex() + 1);
+    stateMachine->delete_car(current_car.get_id());
+
+    QMessageBox::information(0, "INFO", "Car was successfully removed!");
+
+    std::vector<Car<void> > * cars = stateMachine->get_cars_vector();
+
+
+    if (cars->size() == 0)
+    {
+        ui->carSpecificTab->setEnabled(false);
+
+        ui->chooseCarComboBox->clear();
+        ui->addNewPassengerCarSpecificComboBox->clear();
+        ui->deletePassengerCarSpecificComboBox->clear();
+        ui->addStateCarSpecificStateComboBox->clear();
+        ui->addStateCarSpecificNameInput->clear();
+        ui->deleteStateCarSpecificStateComboBox->clear();
+        ui->deleteStateCarSpecificComboBox->clear();
+        ui->addTransitionCarSpecificStateComboBox->clear();
+        ui->addTransitionCarSpecificNameInput->clear();
+        ui->addTransitionCarSpecificFromComboBox->clear();
+        ui->addTransitionCarSpecificToComboBox->clear();
+        ui->deleteTransitionCarSpecificStateComboBox->clear();
+        ui->deleteTransitionCarSpecificFromComboBox->clear();
+        ui->deleteTransitionCarSpecificToComboBox->clear();
+        ui->changeCarActiveStateComboBox->clear();
+        ui->changePassengerStateStateComboBox->clear();
+        ui->changePassengerStateLoginComboBox->clear();
+
+        fill_delete_car_for_substates();
+
+        ui->graphFrame->setScene(scene->drawClearScene());
+    } else {
+        fill_add_transitions_for_substates();
+        fill_delete_transitions_for_substates();
+        fill_car_reachable_states(1);
+        fill_free_passengers_for_substates();
+        fill_car_passengers_for_substates();
+        fill_change_passenger_state_for_substates();
+        fill_delete_car_for_substates();
+        fill_choose_car_for_substates();
+
+        ui->graphFrame->setScene(scene->drawScene());
+    }
 }

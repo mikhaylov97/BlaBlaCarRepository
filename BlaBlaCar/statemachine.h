@@ -660,6 +660,25 @@ namespace StateMachineBlaBlaCar
             cars.push_back(car);
         }
 
+        void delete_car(int car_id)
+        {
+            cars.erase(
+                std::remove_if(
+                    cars.begin(),
+                    cars.end(),
+                    [&car_id](Car<void> car) { return car.get_id() == car_id; }
+                ),
+                cars.end()
+            );
+
+            Car<void>::set_counter(cars.size() + 1);
+            int i = 1;
+            for (auto carIterator = cars.begin(); carIterator != cars.end(); ++carIterator)
+            {
+                carIterator->set_id(i++);
+            }
+        }
+
         void add_transition(Transition<T> transition) throw(StateAlreadyExistsException)
         {
             AssertTransitionNotExistsExc(transition.get_id());

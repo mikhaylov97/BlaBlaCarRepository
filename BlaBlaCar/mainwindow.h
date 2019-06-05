@@ -28,6 +28,8 @@ public:
     void fill_change_passenger_state_for_substates();
     void fill_car_reachable_states();
     void fill_car_reachable_states(int car_id);
+    void fill_choose_car_for_substates();
+    void fill_delete_car_for_substates();
     ~MainWindow();
     StateMachineBlaBlaCar::StateMachine<std::string, StateMachineBlaBlaCar::Allocator<std::string>> * stateMachine;
     StateMachineBlaBlaCar::Scene* scene;
@@ -72,6 +74,10 @@ private slots:
     void on_changePassengerStateLoginComboBox_activated(const QString &arg1);
 
     void on_chooseCarComboBox_activated(int index);
+
+    void on_addCarPushButton_clicked();
+
+    void on_deleteCarPushButton_clicked();
 
 private:
     Ui::MainWindow *ui;

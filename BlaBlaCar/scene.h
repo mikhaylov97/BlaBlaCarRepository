@@ -18,6 +18,7 @@ public:
     Scene(StateMachine<std::string, Allocator<std::string>>* stateMachine,
           Ui::MainWindow *ui);
     QGraphicsScene* drawScene();
+    QGraphicsScene* drawClearScene();
 private:
     StateMachine<std::string, Allocator<std::string>>* stateMachine;
     Ui::MainWindow *ui;

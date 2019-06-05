@@ -24,9 +24,18 @@ namespace StateMachineBlaBlaCar
             this->_id = _counter++;
         }
 
+        Car(int state, std::string from, std::string to)
+        {
+            this->_id = _counter++;
+            this->_state = state;
+            this->_from = from;
+            this->_to = to;
+        }
+
         Car(int id, int state, std::vector<Passenger> passengers, std::string from, std::string to)
         {
             this->_id = id;
+            if (id >= _counter) _counter = id + 1;
             this->_state = state;
             this->_passengers = passengers;
             this->_from = from;
@@ -64,6 +73,11 @@ namespace StateMachineBlaBlaCar
         void set_state_id(int state_id)
         {
             this->_state = state_id;
+        }
+
+        static void set_counter(int counter)
+        {
+            _counter = counter;
         }
 
         std::vector<Passenger> * get_passengers()

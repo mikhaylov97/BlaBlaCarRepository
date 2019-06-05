@@ -310,7 +310,7 @@
         <property name="geometry">
          <rect>
           <x>160</x>
-          <y>320</y>
+          <y>460</y>
           <width>70</width>
           <height>23</height>
          </rect>
@@ -323,7 +323,7 @@
         <property name="geometry">
          <rect>
           <x>130</x>
-          <y>290</y>
+          <y>430</y>
           <width>146</width>
           <height>21</height>
          </rect>
@@ -349,7 +349,7 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>270</y>
+          <y>410</y>
           <width>381</width>
           <height>20</height>
          </rect>
@@ -362,7 +362,7 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>350</y>
+          <y>490</y>
           <width>381</width>
           <height>20</height>
          </rect>
@@ -371,8 +371,129 @@
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
+       <widget class="Line" name="line_7">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>270</y>
+          <width>381</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_16">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>290</y>
+          <width>47</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Add car:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_19">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>320</y>
+          <width>47</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>From:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_37">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>350</y>
+          <width>47</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>To:</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="addCarFromInputField">
+        <property name="geometry">
+         <rect>
+          <x>60</x>
+          <y>320</y>
+          <width>121</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="addCarToInputField">
+        <property name="geometry">
+         <rect>
+          <x>60</x>
+          <y>350</y>
+          <width>121</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="addCarPushButton">
+        <property name="geometry">
+         <rect>
+          <x>110</x>
+          <y>380</y>
+          <width>71</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Add</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_38">
+        <property name="geometry">
+         <rect>
+          <x>260</x>
+          <y>290</y>
+          <width>47</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Add car:</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="deleteCarComboBox">
+        <property name="geometry">
+         <rect>
+          <x>210</x>
+          <y>320</y>
+          <width>161</width>
+          <height>22</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="deleteCarPushButton">
+        <property name="geometry">
+         <rect>
+          <x>300</x>
+          <y>350</y>
+          <width>71</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Delete</string>
+        </property>
+       </widget>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="carSpecificTab">
        <attribute name="title">
         <string>Car specific actions</string>
        </attribute>
@@ -1035,7 +1156,7 @@
      <x>0</x>
      <y>0</y>
      <width>1019</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

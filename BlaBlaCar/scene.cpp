@@ -9,7 +9,12 @@ Scene::Scene(StateMachine<std::string, Allocator<std::string>>* stateMachine,
     this->ui = ui;
 }
 
-QGraphicsScene* Scene::drawScene() {
+QGraphicsScene * Scene::drawClearScene() {
+    QGraphicsScene* scene = new QGraphicsScene();
+    return scene;
+}
+
+QGraphicsScene * Scene::drawScene() {
     QGraphicsScene* scene = new QGraphicsScene();
     QFont fontForLogin = QFont();
     fontForLogin.setBold(true);
