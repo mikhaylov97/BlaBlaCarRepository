@@ -17,7 +17,6 @@
 
 namespace StateMachineBlaBlaCar
 {
-    // fix circular dependency between Iterator.h and StateDiagram.h
     template <typename T, typename Alloc>
     class Iterator;
 
@@ -986,8 +985,6 @@ namespace StateMachineBlaBlaCar
                 QJsonObject obj;
                 obj["id"] = stateIterator->get_id();
                 obj["value"] = QString::fromStdString(stateIterator->get_value());
-        //        obj["pos_x"] = std::trunc(iter->get_pos_x() * 100) / 100;
-        //        obj["pos_y"] = std::trunc(iter->get_pos_y() * 100) / 100;
                 if (stateIterator->get_states()->size() > 0) {
                     QJsonArray jChildStates;
                     for (auto childStateIterator = stateIterator->get_states()->begin(); childStateIterator != stateIterator->get_states()->end(); ++childStateIterator)
@@ -1011,8 +1008,6 @@ namespace StateMachineBlaBlaCar
                 obj["initialStateId"] = transitionIterator->get_initial_state().get_id();
                 obj["finalStateId"] = transitionIterator->get_final_state().get_id();
 
-        //        obj["pos_x"] = std::trunc(iter->get_pos_x() * 100) / 100;
-        //        obj["pos_y"] = std::trunc(iter->get_pos_y() * 100) / 100;
                 jTransitions.push_back(obj);
             }
 
@@ -1110,35 +1105,6 @@ namespace StateMachineBlaBlaCar
             }
         }
 
-        friend std::ostream & operator<<(std::ostream & os, const StateMachine<T, Alloc> & machine)
-        {
-            os << const_cast<StateMachine<T, Alloc>*>(&machine)->to_json() << std::endl;
-            return os;
-        }
-
-        friend std::istream & operator>>(std::istream & is, StateMachine<T, Alloc> ** machine) throw(ParsingException)
-        {
-            std::string jsonStr;
-            is >> jsonStr;
-//            * machine = StateMachine<T, Alloc>::FromJson(jsonStr);
-            machine->from_json(jsonStr);
-            return is;
-        }
-
-        friend std::ostringstream & operator<<(std::ostringstream & os, const StateMachine<T, Alloc> & machine)
-        {
-            os << const_cast<StateMachine<T, Alloc>*>(&machine)->to_json() << std::endl;
-            return os;
-        }
-
-        friend std::istringstream & operator>>(std::istringstream & is, StateMachine<T, Alloc>** machine) throw(ParsingException)
-        {
-            std::string jsonStr;
-            is >> jsonStr;
-//            * machine = StateMachine<T, Alloc>::FromJson(jsonStr);
-            (*machine)->from_json(jsonStr);
-            return is;
-        }
     };
 
     template <typename T, typename Alloc>

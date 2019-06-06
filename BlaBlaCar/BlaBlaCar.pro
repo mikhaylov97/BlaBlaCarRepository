@@ -43,7 +43,8 @@ HEADERS += \
     algorithm.h \
     serializer.h \
     car.h \
-    passenger.h
+    passenger.h \
+    manipulator.h
 
 
 FORMS += \

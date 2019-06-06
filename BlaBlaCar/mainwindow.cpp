@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     stateMachine = new StateMachine<std::string, Allocator<std::string>>();
 
-    Serializer<StateMachine<std::string,Allocator<std::string>>> & serializer = Serializer<StateMachine<std::string,Allocator<std::string>>>::get_instance();
+    Serializer<std::string,Allocator<std::string>> & serializer = Serializer<std::string,Allocator<std::string>>::get_instance();
     serializer.import_from_json(stateMachine);
 
     ui->setupUi(this);
@@ -82,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    Serializer<StateMachine<std::string,Allocator<std::string>>> & serializer = Serializer<StateMachine<std::string,Allocator<std::string>>>::get_instance();
+    Serializer<std::string,Allocator<std::string>> & serializer = Serializer<std::string,Allocator<std::string>>::get_instance();
     serializer.export_to_json(stateMachine);
     delete ui;
 };
