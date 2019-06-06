@@ -23,22 +23,32 @@ namespace StateMachineBlaBlaCar
         std::string _msg;
     };
 
-    class CarNotFoundException: public Exception {
+    class CarException: public Exception {
+    private:
+        std::string message;
+    public:
+        CarException(std::string message): Exception(message){
+            this->message = message;
+        }
+        std::string getMessage() { return this->message; }
+    };
+
+    class CarNotFoundException: public CarException {
     private:
         int id;
     public:
-        CarNotFoundException(int id): Exception("Car with id [" + std::to_string(id) + "] not found!"){
+        CarNotFoundException(int id): CarException("Car with id [" + std::to_string(id) + "] not found!"){
             this->id = id;
         }
         int getCarId() { return this->id; }
     };
 
-    class CarAlreadyExistsException: public Exception {
+    class CarAlreadyExistsException: public CarException {
     private:
         int id;
         Car<void> * car;
     public:
-        CarAlreadyExistsException(int id, Car<void> * car): Exception("Car with id [" + std::to_string(id) + "] already exists!"){
+        CarAlreadyExistsException(int id, Car<void> * car): CarException("Car with id [" + std::to_string(id) + "] already exists!"){
             this->id = id;
             this->car = car;
         }
@@ -46,23 +56,33 @@ namespace StateMachineBlaBlaCar
         Car<void> * getCar() { return this->car; }
     };
 
-    class PassengerNotFoundException: public Exception {
+    class PassengerException: public Exception {
+    private:
+        std::string message;
+    public:
+        PassengerException(std::string message): Exception(message){
+            this->message = message;
+        }
+        std::string getMessage() { return this->message; }
+    };
+
+    class PassengerNotFoundException: public PassengerException {
     private:
         std::string login;
     public:
-        PassengerNotFoundException(std::string login): Exception("Passenger with login [" + login + "] not found!"){
+        PassengerNotFoundException(std::string login): PassengerException("Passenger with login [" + login + "] not found!"){
             this->login = login;
         }
         std::string getPassengerLogin() { return this->login; }
     };
 
-    class PassengerAlreadyExistsException: public Exception
+    class PassengerAlreadyExistsException: public PassengerException
     {
     private:
         std::string login;
         Passenger * passenger;
     public:
-        PassengerAlreadyExistsException(std::string login, Passenger * passenger) : Exception("Passenger with login [" + login + "] is already exists.") {
+        PassengerAlreadyExistsException(std::string login, Passenger * passenger) : PassengerException("Passenger with login [" + login + "] is already exists.") {
             this->login = login;
             this->passenger = passenger;
         }
@@ -70,17 +90,27 @@ namespace StateMachineBlaBlaCar
         Passenger * getPassenger() { return this->passenger; }
     };
 
+    class StateException: public Exception {
+    private:
+        std::string message;
+    public:
+        StateException(std::string message): Exception(message){
+            this->message = message;
+        }
+        std::string getMessage() { return this->message; }
+    };
+
     template <typename T>
-    class SubstateNotFoundException: public Exception
+    class SubstateNotFoundException: public StateException
     {
     private:
         int id;
         std::string name;
     public:
-        SubstateNotFoundException(int id) : Exception("Substate with id [" + std::to_string(id) + "] not found.") {
+        SubstateNotFoundException(int id) : StateException("Substate with id [" + std::to_string(id) + "] not found.") {
             this->id = id;
         }
-        SubstateNotFoundException(std::string name) : Exception("Substate with name [" + std::to_string(id) + "] not found.") {
+        SubstateNotFoundException(std::string name) : StateException("Substate with name [" + std::to_string(id) + "] not found.") {
             this->name = name;
         }
         int getSubstateId() { return id; }
@@ -88,18 +118,18 @@ namespace StateMachineBlaBlaCar
     };
 
     template <typename T>
-    class SubstateAlreadyExistsException: public Exception
+    class SubstateAlreadyExistsException: public StateException
     {
     private:
         int id;
         std::string name;
         State<T> * state;
     public:
-        SubstateAlreadyExistsException(int id, State<T> * state) : Exception("Substate with id [" + std::to_string(id) + "] is already exists.") {
+        SubstateAlreadyExistsException(int id, State<T> * state) : StateException("Substate with id [" + std::to_string(id) + "] is already exists.") {
             this->id = id;
             this->state = state;
         }
-        SubstateAlreadyExistsException(std::string name, State<T> * state) : Exception("Substate with name [" + name + "] is already exists.") {
+        SubstateAlreadyExistsException(std::string name, State<T> * state) : StateException("Substate with name [" + name + "] is already exists.") {
             this->name = name;
             this->state = state;
         }
@@ -109,16 +139,16 @@ namespace StateMachineBlaBlaCar
     };
 
     template <typename T>
-    class StateNotFoundException: public Exception
+    class StateNotFoundException: public StateException
     {
     private:
         int id;
         std::string name;
     public:
-        StateNotFoundException(int id) : Exception("State with id [" + std::to_string(id) + "] not found.") {
+        StateNotFoundException(int id) : StateException("State with id [" + std::to_string(id) + "] not found.") {
             this->id = id;
         }
-        StateNotFoundException(std::string name) : Exception("State with name [" + name + "] not found.") {
+        StateNotFoundException(std::string name) : StateException("State with name [" + name + "] not found.") {
             this->name = name;
         }
         int getStateId() { return id; }
@@ -126,18 +156,18 @@ namespace StateMachineBlaBlaCar
     };
 
     template <typename T>
-    class StateAlreadyExistsException: public Exception
+    class StateAlreadyExistsException: public StateException
     {
     private:
         int id;
         std::string name;
         State<T> * state;
     public:
-        StateAlreadyExistsException(int id, State<T> * state) : Exception("State with id [" + std::to_string(id) + "] is already exists.") {
+        StateAlreadyExistsException(int id, State<T> * state) : StateException("State with id [" + std::to_string(id) + "] is already exists.") {
             this->id = id;
             this->state = state;
         }
-        StateAlreadyExistsException(std::string name, State<T> * state) : Exception("State with name [" + name + "] is already exists.") {
+        StateAlreadyExistsException(std::string name, State<T> * state) : StateException("State with name [" + name + "] is already exists.") {
             this->name = name;
             this->state = state;
         }
@@ -146,18 +176,28 @@ namespace StateMachineBlaBlaCar
         State<T> * getState() { return this->state; }
     };
 
+    class TransitionException: public Exception {
+    private:
+        std::string message;
+    public:
+        TransitionException(std::string message): Exception(message){
+            this->message = message;
+        }
+        std::string getMessage() { return this->message; }
+    };
+
     template <typename T>
-    class TransitionNotFoundException: public Exception
+    class TransitionNotFoundException: public TransitionException
     {
     private:
         int id;
         int first_state_id;
         int second_state_id;
     public:
-        TransitionNotFoundException(int id) : Exception("Transition with id [" + std::to_string(id) + "] not found.") {
+        TransitionNotFoundException(int id) : TransitionException("Transition with id [" + std::to_string(id) + "] not found.") {
             this->id = id;
         }
-        TransitionNotFoundException(int first_state_id, int second_state_id) : Exception("Transition with initialStateId/finalStateId [" + std::to_string(first_state_id) + "/" + std::to_string(second_state_id) + "] not found.") {
+        TransitionNotFoundException(int first_state_id, int second_state_id) : TransitionException("Transition with initialStateId/finalStateId [" + std::to_string(first_state_id) + "/" + std::to_string(second_state_id) + "] not found.") {
             this->first_state_id = first_state_id;
             this->second_state_id = second_state_id;
         }
@@ -167,14 +207,14 @@ namespace StateMachineBlaBlaCar
     };
 
     template <typename T>
-    class TransitionAlreadyExistsException: public Exception
+    class TransitionAlreadyExistsException: public TransitionException
     {
     private:
         int initial_state_id;
         int final_state_id;
         Transition<T> * transition;
     public:
-        TransitionAlreadyExistsException(int initial_state_id, int final_state_id, Transition<T> * transition) : Exception("Transition with initialStateId/finalStateId [" + std::to_string(initial_state_id) + "/" + std::to_string(final_state_id) + "] already exists.") {
+        TransitionAlreadyExistsException(int initial_state_id, int final_state_id, Transition<T> * transition) : TransitionException("Transition with initialStateId/finalStateId [" + std::to_string(initial_state_id) + "/" + std::to_string(final_state_id) + "] already exists.") {
             this->initial_state_id = initial_state_id;
             this->final_state_id = final_state_id;
             this->transition = transition;
