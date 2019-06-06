@@ -38,9 +38,9 @@ namespace StateMachineBlaBlaCar {
             void write(StateMachine<T, Alloc> * stateMachine);
 
             friend std::ostream & operator<<(std::ostream & os, const StateMachine<T, Alloc> & machine);
-            friend std::istream & operator>>(std::istream & is, StateMachine<T, Alloc> ** machine) throw(ParsingException);
+            friend std::istream & operator>>(std::istream & is, StateMachine<T, Alloc> ** machine);
             friend std::ostringstream & operator<<(std::ostringstream & os, const StateMachine<T, Alloc> & machine);
-            friend std::istringstream & operator>>(std::istringstream & is, StateMachine<T, Alloc>** machine) throw(ParsingException);
+            friend std::istringstream & operator>>(std::istringstream & is, StateMachine<T, Alloc>** machine);
         };
 
     template <typename T, typename Alloc>
@@ -85,7 +85,7 @@ namespace StateMachineBlaBlaCar {
     }
 
     template <typename T, typename Alloc>
-    std::istream & operator>>(std::istream & is, StateMachine<T, Alloc> ** machine) throw(ParsingException)
+    std::istream & operator>>(std::istream & is, StateMachine<T, Alloc> ** machine)
     {
         std::string jsonStr;
         is >> jsonStr;
@@ -101,7 +101,7 @@ namespace StateMachineBlaBlaCar {
     }
 
     template <typename T, typename Alloc>
-    std::istringstream & operator>>(std::istringstream & is, StateMachine<T, Alloc>** machine) throw(ParsingException)
+    std::istringstream & operator>>(std::istringstream & is, StateMachine<T, Alloc>** machine)
     {
         std::string jsonStr;
         is >> jsonStr;

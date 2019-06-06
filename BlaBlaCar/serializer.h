@@ -2,25 +2,9 @@
 #define SERIALIZER_H
 #pragma once
 
-//#include "exceptions.h"
-//#include "state.h"
-//#include "transition.h"
 #include "allocator.h"
 #include "manipulator.h"
-#include "statemachine.h"
-//#include <cmath>
-//#include <sstream>
-//#include <iostream>
-//#include <fstream>
 #include <string>
-
-//#include <QJsonObject>
-//#include <QJsonArray>
-//#include <QJsonDocument>
-//#include <QJsonValue>
-//#include <QFile>
-//#include <QDebug>
-//#include <QDir>
 
 namespace StateMachineBlaBlaCar
 {

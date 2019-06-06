@@ -37,7 +37,7 @@ namespace StateMachineBlaBlaCar
 
 #pragma region ConditionHelpers
 
-        bool NoIllegalTransitions()
+        bool NoIllegalTransitionsForStates()
         {
             for (auto i = transitions.begin(); i != transitions.end(); ++i)
             {
@@ -62,6 +62,54 @@ namespace StateMachineBlaBlaCar
             return true;
         }
 
+        bool NoIllegalTransitionsForSubstates()
+        {
+            for (auto i = transitions.begin(); i != transitions.end(); ++i)
+            {
+                for (auto sub = states.begin(); sub != states.end(); ++sub)
+                {
+                    if (sub->get_states()->size() > 1)
+                    {
+                        int initial_state_id = (*i).get_initial_state().get_id();
+                        int final_state_id = (*i).get_final_state().get_id();
+                        auto initial_state = std::find_if(
+                                    sub->get_states()->begin(),
+                                    sub->get_states()->end(),
+                                    [&initial_state_id](const State<T> & state) { return state.get_id() == initial_state_id; }
+                        );
+                        auto final_state = std::find_if(
+                                    sub->get_states()->begin(),
+                                    sub->get_states()->end(),
+                                    [&final_state_id](const State<T> & state) { return state.get_id() == final_state_id; }
+                        );
+                        if (initial_state == sub->get_states()->end() || final_state == sub->get_states()->end())
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+            }
+
+            return true;
+        }
+
+        bool SubstateExists(int id)
+        {
+            for (auto stateIterator = states.begin(); stateIterator != states.end(); ++stateIterator)
+            {
+                if (stateIterator->get_states()->size() > 0)
+                {
+                    for (auto substateIterator = stateIterator->get_states()->begin(); substateIterator != stateIterator->get_states()->end(); ++substateIterator)
+                    {
+                        if (substateIterator->get_id() == id) return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         bool StateExists(int id)
         {
             auto state = std::find_if(
@@ -74,6 +122,69 @@ namespace StateMachineBlaBlaCar
                 return false;
             else
                 return true;
+        }
+
+        bool StateExists(std::string name)
+        {
+            auto state = std::find_if(
+                        states.begin(),
+                        states.end(),
+                        [&name](const State<T> & state) { return state.get_value().compare(name) == 0; }
+            );
+
+            if (state == states.end())
+                return false;
+            else
+                return true;
+        }
+
+        bool SubstateExists(std::string name)
+        {
+            for (auto stateIterator = states.begin(); stateIterator != states.end(); ++stateIterator)
+            {
+                if (stateIterator->get_states()->size() > 0)
+                {
+                    for (auto substateIterator = stateIterator->get_states()->begin(); substateIterator != stateIterator->get_states()->end(); ++substateIterator)
+                    {
+                        if (substateIterator->get_value().compare(name) == 0) return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        bool CarExists(int id)
+        {
+            auto car = std::find_if(
+                        cars.begin(),
+                        cars.end(),
+                        [&id](const Car<void> & car) { return car.get_id() == id; }
+            );
+
+            if (car == cars.end())
+                return false;
+            else
+                return true;
+        }
+
+        bool PassengerExists(std::string login)
+        {
+            for (auto carIterator = cars.begin(); carIterator != cars.end(); ++carIterator)
+            {
+                auto passenger = std::find_if(
+                            carIterator->get_passengers()->begin(),
+                            carIterator->get_passengers()->end(),
+                            [&login](const Passenger & passenger) { return passenger.get_login().compare(login) == 0; }
+                );
+
+                if (passenger != carIterator->get_passengers()->end())
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         bool TransitionExists(int id)
@@ -110,68 +221,203 @@ namespace StateMachineBlaBlaCar
 
 #pragma region PreConditions
 
-        inline void AssertStateExistsExc(int id) throw(StateNotFoundException)
+        inline void AssertStateExistsPreCondition(int id) throw(StateNotFoundException<T>)
         {
             if (!StateExists(id))
-                throw StateNotFoundException(std::to_string(id));
+                throw StateNotFoundException<T>(id);
         }
 
-        inline void AssertStateNotExistsExc(int id) throw(StateAlreadyExistsException)
+        inline void AssertStateExistsPreCondition(std::string name) throw(StateNotFoundException<T>)
+        {
+            if (!StateExists(name))
+                throw StateNotFoundException<T>(name);
+        }
+
+        inline void AssertStateNotExistsPreCondition(std::string name) throw(StateAlreadyExistsException<T>)
+        {
+            if (StateExists(name))
+            {
+                throw StateAlreadyExistsException<T>(name, find_state_by_name(name));
+            }
+        }
+
+        inline void AssertStateNotExistsPreCondition(int id) throw(StateAlreadyExistsException<T>)
         {
             if (StateExists(id))
-                throw StateAlreadyExistsException(std::to_string(id));
+            {
+                State<T> state = find_state_by_id(id);
+                throw StateAlreadyExistsException<T>(id, &state);
+            }
         }
 
-        inline void AssertTransitionExistsExc(int id) throw(TransitionNotFoundException)
+        inline void AssertSubstateExistsPreCondition(int id) throw(StateNotFoundException<T>)
+        {
+            if (!SubstateExists(id))
+                throw SubstateNotFoundException<T>(id);
+        }
+
+        inline void AssertSubstateExistsPreCondition(std::string name) throw(StateNotFoundException<T>)
+        {
+            if (!SubstateExists(name))
+                throw SubstateNotFoundException<T>(name);
+        }
+
+        inline void AssertSubstateNotExistsPreCondition(int superstate_id, int id) throw(StateNotFoundException<T>)
+        {
+            if (SubstateExists(id))
+            {
+                State<T> substate = find_substate_by_id(superstate_id, id);
+                throw SubstateAlreadyExistsException<T>(id, &substate);
+            }
+        }
+
+        inline void AssertSubstateNotExistsPreCondition(std::string name) throw(StateNotFoundException<T>)
+        {
+            if (SubstateExists(name))
+                throw SubstateAlreadyExistsException<T>(name, find_substate_by_id(name));
+        }
+
+        inline void AssertTransitionExistsPreCondition(int id) throw(TransitionNotFoundException<T>)
         {
             if (!TransitionExists(id))
-                throw TransitionNotFoundException(std::to_string(id));
+                throw TransitionNotFoundException<T>(id);
         }
 
-        inline void AssertTransitionExistsExc(int first_state_id, int second_state_id) throw(TransitionNotFoundException)
+        inline void AssertTransitionExistsPreCondition(int initial_state_id, int final_state_id) throw(TransitionNotFoundException<T>)
         {
-            if (!TransitionExists(first_state_id, second_state_id))
-                throw TransitionNotFoundException("0");
+            if (!TransitionExists(initial_state_id, final_state_id))
+                throw TransitionNotFoundException<T>(initial_state_id, final_state_id);
         }
 
-        inline void AssertTransitionNotExistsExc(int first_state_id, int second_state_id) throw(TransitionAlreadyExistsException)
+        inline void AssertTransitionNotExistsPreCondition(int id) throw(TransitionAlreadyExistsException<T>)
+        {
+            if (TransitionExists(id))
+                throw TransitionAlreadyExistsException<T>(id, find_transition(id));
+        }
+
+        inline void AssertTransitionNotExistsPreCondition(int first_state_id, int second_state_id) throw(TransitionAlreadyExistsException<T>)
         {
             if (TransitionExists(first_state_id, second_state_id))
-                throw TransitionAlreadyExistsException(std::to_string(first_state_id), std::to_string(second_state_id));
+            {
+                Transition<T> transition = find_transition(first_state_id, second_state_id);
+                throw TransitionAlreadyExistsException<T>(first_state_id, second_state_id, &transition);
+            }
         }
+
+        inline void AssertCarExistsPreCondition(int id) throw(CarNotFoundException)
+        {
+            if (!CarExists(id))
+                throw CarNotFoundException(id);
+        }
+
+        inline void AssertCarNotExistsPreCondition(int id) throw(CarAlreadyExistsException)
+        {
+            if (CarExists(id)) {
+                Car<void> car = find_car_by_id(id);
+                throw CarAlreadyExistsException(id, &car);
+            }
+        }
+
+        inline void AssertPassengerExistsPreCondition(std::string login) throw(PassengerNotFoundException)
+        {
+            if (!PassengerExists(login))
+                throw PassengerNotFoundException(login);
+        }
+
+        inline void AssertPassengerNotExistsPreCondition(std::string login) throw(PassengerAlreadyExistsException)
+        {
+            if (PassengerExists(login))
+                throw PassengerAlreadyExistsException(login, find_passenger_by_login(login));
+        }
+
 
 #pragma endregion
 
 #pragma region PostConditions
 
-        inline void AssertIllegalTransitions()
+        inline void AssertIllegalTransitionsPostCondition()
         {
-            assert(("Illegal transitions exist", NoIllegalTransitions()));
+            assert(("Illegal transitions for superstates exist.", NoIllegalTransitionsForStates() && NoIllegalTransitionsForSubstates()));
         }
 
-        inline void AssertStateExists(int id)
+        inline void AssertStateExistsPostCondition(int id)
         {
-            assert(("State (id: " + std::to_string(id) + ") doesn't exist", StateExists(id)));
+            assert(("Superstate with id [" + std::to_string(id) + "] doesn't exist.", StateExists(id)));
         }
 
-        inline void AssertStateNotExists(int id)
+        inline void AssertStateExistsPostCondition(std::string name)
         {
-            assert(("State (id: " + std::to_string(id) + ") still exists", !StateExists(id)));
+            assert(("Superstate with name [" + name + "] doesn't exist.", StateExists(name)));
         }
 
-        inline void AssertTransitionExists(int id)
+        inline void AssertStateNotExistsPostCondition(int id)
         {
-            assert(("Transition (id: " + std::to_string(id) + ") doesn't exist", TransitionExists(id)));
+            assert(("Superstate with id [" + std::to_string(id) + "] still exists", !StateExists(id)));
         }
 
-        inline void AssertTransitionNotExists(int id)
+        inline void AssertStateNotExistsPostCondition(std::string name)
         {
-            assert(("Transition (id: " + std::to_string(id) + ") still exists", !TransitionExists(id)));
+            assert(("Superstate with name [" + name + "] still exists", !StateExists(name)));
         }
 
-        inline void AssertTransitionNotExists(int first_state_id, int second_state_id)
+        inline void AssertSubstateExistsPostCondition(int id)
         {
-            assert(("Transition with first_state_id [" + std::to_string(first_state_id) + "] and secon_ state_id [" + std::to_string(second_state_id) + "] still exists", !TransitionExists(first_state_id, second_state_id)));
+            assert(("Substate with id [" + std::to_string(id) + "] doesn't exist.", SubstateExists(id)));
+        }
+
+        inline void AssertSubstateExistsPostCondition(std::string name)
+        {
+            assert(("Substate with name [" + name + "] doesn't exist.", SubstateExists(name)));
+        }
+
+        inline void AssertSubstateNotExistsPostCondition(int id)
+        {
+            assert(("Substate with id [" + std::to_string(id) + "] still exists", !SubstateExists(id)));
+        }
+
+        inline void AssertSubstateNotExistsPostCondition(std::string name)
+        {
+            assert(("Substate with name [" + name + "] still exists", !SubstateExists(name)));
+        }
+
+        inline void AssertTransitionExistsPostCondition(int id)
+        {
+            assert(("Transition with id [" + std::to_string(id) + "] doesn't exist", TransitionExists(id)));
+        }
+
+        inline void AssertTransitionExistsPostCondition(int initial_state_id, int final_state_id)
+        {
+            assert(("Transition with initialStateId/finalStateId [" + std::to_string(initial_state_id) + "/" + std::to_string(final_state_id) + "] doesn't exist", TransitionExists(initial_state_id, final_state_id)));
+        }
+
+        inline void AssertTransitionNotExistsPostCondition(int id)
+        {
+            assert(("Transition with id [" + std::to_string(id) + "] still exists", !TransitionExists(id)));
+        }
+
+        inline void AssertTransitionNotExistsPostCondition(int first_state_id, int second_state_id)
+        {
+            assert(("Transition with initialStateId/finalStateId [" + std::to_string(first_state_id) + "/" + std::to_string(second_state_id) + "] still exists", !TransitionExists(first_state_id, second_state_id)));
+        }
+
+        inline void AssertCarExistsPostCondition(int car_id)
+        {
+            assert(("Car with id [" + std::to_string(car_id) + "] doesn't exists", CarExists(car_id)));
+        }
+
+        inline void AssertCarNotExistsPostCondition(int car_id)
+        {
+            assert(("Car with id [" + std::to_string(car_id) + "] still exists", !CarExists(car_id)));
+        }
+
+        inline void AssertPassengerExistsPostCondition(std::string login)
+        {
+            assert(("Passenger with login [" + login + "] doesn't exists", PassengerExists(login)));
+        }
+
+        inline void AssertPassengerNotExistsPostCondition(std::string login)
+        {
+            assert(("Passenger with login [" + login + "] still exists", !PassengerExists(login)));
         }
 
 #pragma endregion
@@ -189,18 +435,44 @@ namespace StateMachineBlaBlaCar
             if (_counter <= id) _counter = ++id;
         }
 
-        void add_transition_with_id(int first_state_id, int second_state_id, std::string name, bool one_way, int id) throw(StateNotFoundException)
+        void add_transition_with_id(int first_state_id, int second_state_id, std::string name, bool one_way, int id) throw(StateNotFoundException<T>)
         {
+            AssertTransitionNotExistsPreCondition(first_state_id, second_state_id);
+
             auto initial_state = std::find_if(states.begin(), states.end(),
                 [&first_state_id](const State<T> & state) { return state.get_id() == first_state_id; });
             auto final_state = std::find_if(states.begin(), states.end(),
                 [&second_state_id](const State<T>& state) { return state.get_id() == second_state_id; });
-            if (initial_state == states.end() || final_state == states.end())
+            if (initial_state == states.end())
             {
-                throw StateNotFoundException(_id);
+                throw StateNotFoundException<T>(first_state_id);
+            }
+            if (final_state == states.end())
+            {
+                throw StateNotFoundException<T>(second_state_id);
             }
             Transition<T> * transition = new Transition<T>(name, *initial_state, *final_state, one_way, id);
             transitions.push_back(*transition);
+
+            AssertTransitionExistsPostCondition(transition->get_id());
+        }
+
+        Passenger find_passenger_by_login(std::string login)
+        {
+            AssertPassengerExistsPreCondition(login);
+
+            for(auto carIterator = cars.begin(); carIterator != cars.end(); ++carIterator)
+            {
+                for(auto passengerIterator = carIterator->get_passengers()->begin(); passengerIterator != carIterator->get_passengers()->end(); ++passengerIterator)
+                {
+                    if (passengerIterator->get_login().compare(login) == 0)
+                    {
+                        return *passengerIterator;
+                    }
+                }
+            }
+
+            throw PassengerNotFoundException(login);
         }
 
         std::vector<Passenger> * find_free_passengers(int except_car_id)
@@ -220,6 +492,8 @@ namespace StateMachineBlaBlaCar
 
         std::vector<Passenger> * find_car_passengers(int car_id)
         {
+            AssertCarExistsPreCondition(car_id);
+
             for(auto carIterator = cars.begin(); carIterator != cars.end(); ++carIterator)
             {
                 if (carIterator->get_id() == car_id)
@@ -228,12 +502,16 @@ namespace StateMachineBlaBlaCar
                 }
             }
 
+            AssertCarExistsPostCondition(car_id);
+
             std::vector<Passenger> * passengers = new std::vector<Passenger>();
             return passengers;
         }
 
-        Passenger find_car_passenger(int car_id, std::string login)
+        Passenger find_car_passenger(int car_id, std::string login) throw (CarNotFoundException, PassengerNotFoundException)
         {
+            AssertPassengerExistsPreCondition(login);
+
             auto car = std::find_if(
                         cars.begin(),
                         cars.end(),
@@ -242,7 +520,7 @@ namespace StateMachineBlaBlaCar
 
             if (car == cars.end())
             {
-                throw CarNotFoundException(std::to_string(car_id));
+                throw CarNotFoundException(car_id);
             }
 
             auto passenger = std::find_if(
@@ -256,11 +534,15 @@ namespace StateMachineBlaBlaCar
                 throw PassengerNotFoundException(login);
             }
 
+            AssertPassengerExistsPostCondition(login);
+
             return *passenger;
         }
 
-        void remove_car_passengers(int car_id)
+        void remove_car_passengers(int car_id) throw (CarNotFoundException)
         {
+            AssertCarExistsPreCondition(car_id);
+
             auto car = std::find_if(
                         cars.begin(),
                         cars.end(),
@@ -269,14 +551,18 @@ namespace StateMachineBlaBlaCar
 
             if (car == cars.end())
             {
-                throw CarNotFoundException(std::to_string(car_id));
+                throw CarNotFoundException(car_id);
             }
 
             car->get_passengers()->clear();
+
+            AssertCarExistsPostCondition(car_id);
         }
 
-        void change_passenger_active_state(int car_id, std::string login, int state_id)
+        void change_passenger_active_state(int car_id, std::string login, int state_id) throw (CarNotFoundException, PassengerNotFoundException)
         {
+            AssertPassengerExistsPreCondition(login);
+
             auto car = std::find_if(
                         cars.begin(),
                         cars.end(),
@@ -285,7 +571,7 @@ namespace StateMachineBlaBlaCar
 
             if (car == cars.end())
             {
-                throw CarNotFoundException(std::to_string(car_id));
+                throw CarNotFoundException(car_id);
             }
 
             auto passenger = std::find_if(
@@ -300,20 +586,29 @@ namespace StateMachineBlaBlaCar
             }
 
             passenger->set_state_id(state_id);
+
+            AssertPassengerExistsPostCondition(login);
         }
 
         State<T> & find_state_by_name(std::string state_name)
         {
+            AssertStateExistsPreCondition(state_name);
+
             auto state = std::find_if(
                         states.begin(),
                         states.end(),
                         [&state_name](const State<T> & state) { return state.get_value().compare(state_name) == 0; }
             );
+
+            AssertStateExistsPostCondition(state_name);
+
             return *state;
         }
 
         bool is_substate_is_available_for_removing(int substate_id)
         {
+            AssertSubstateExistsPreCondition(substate_id);
+
             for(auto carIterator = cars.begin(); carIterator != cars.end(); ++carIterator)
             {
                 for (auto passengerIterator = carIterator->get_passengers()->begin(); passengerIterator != carIterator->get_passengers()->end(); ++passengerIterator)
@@ -325,11 +620,15 @@ namespace StateMachineBlaBlaCar
                 }
             }
 
+            AssertSubstateExistsPostCondition(substate_id);
+
             return true;
         }
 
         State<T> & find_substate_by_name(std::string name, int superstate_id)
         {
+            AssertSubstateExistsPreCondition(name);
+
             auto state = std::find_if(
                         states.begin(),
                         states.end(),
@@ -342,16 +641,24 @@ namespace StateMachineBlaBlaCar
                         substates->end(),
                         [&name](const State<T> & state) { return state.get_value().compare(name) == 0; }
             );
+
+            AssertSubstateExistsPostCondition(name);
+
             return *substate;
         }
 
         State<T> & find_state_by_id(int state_id)
         {
+            AssertStateExistsPreCondition(state_id);
+
             auto state = std::find_if(
                         states.begin(),
                         states.end(),
                         [&state_id](const State<T> & state) { return state.get_id() == state_id; }
             );
+
+            AssertStateExistsPostCondition(state_id);
+
             return *state;
         }
 
@@ -386,7 +693,7 @@ namespace StateMachineBlaBlaCar
             );
             if (state == states.end())
             {
-                throw StateNotFoundException(std::to_string(superstate_id));
+                throw StateNotFoundException<T>(superstate_id);
             }
 
             auto substate = std::find_if(
@@ -403,8 +710,10 @@ namespace StateMachineBlaBlaCar
             return true;
         }
 
-        State<T> & find_substate_by_id(int superstate_id, int substate_id)
+        State<T> & find_substate_by_id(int superstate_id, int substate_id) throw (StateNotFoundException<T>, SubstateNotFoundException<T>)
         {
+            AssertSubstateExistsPreCondition(substate_id);
+
             auto state = std::find_if(
                         states.begin(),
                         states.end(),
@@ -412,7 +721,7 @@ namespace StateMachineBlaBlaCar
             );
             if (state == states.end())
             {
-                throw StateNotFoundException(std::to_string(superstate_id));
+                throw StateNotFoundException<T>(superstate_id);
             }
 
             auto substate = std::find_if(
@@ -423,10 +732,35 @@ namespace StateMachineBlaBlaCar
 
             if (substate == state->get_states()->end())
             {
-                throw StateNotFoundException(std::to_string(substate_id));
+                throw SubstateNotFoundException<T>(substate_id);
             }
 
+            AssertSubstateExistsPostCondition(substate_id);
+
             return *substate;
+        }
+
+        Transition<T> find_transition(int first_state_id, int second_state_id) throw(TransitionNotFoundException<T>)
+        {
+            AssertTransitionExistsPreCondition(first_state_id, second_state_id);
+
+            auto transition = std::find_if(
+                        transitions.begin(),
+                        transitions.end(),
+                        [&first_state_id,&second_state_id](const Transition<T> & transition) { return
+                    (const_cast<Transition<T> &>(transition)).get_initial_state().get_id() == first_state_id &&
+                    (const_cast<Transition<T> &>(transition)).get_final_state().get_id() == second_state_id; }
+            );
+
+            if (transition == transitions.end())
+            {
+                throw TransitionNotFoundException<T>(first_state_id, second_state_id);
+            }
+
+            AssertTransitionExistsPostCondition(first_state_id, second_state_id);
+
+            return *transition;
+
         }
 
         std::vector<Transition<T>> find_all_transitions_except_substate_transitions()
@@ -462,6 +796,8 @@ namespace StateMachineBlaBlaCar
 
         std::vector<Transition<T>> find_all_transitions_for_superstate(State<T> superstate)
         {
+            AssertStateExistsPreCondition(superstate.get_id());
+
             std::vector<State<T>> * substates = superstate.get_states();
             std::vector<Transition<T>> * matches = new std::vector<Transition<T>>();
             for(auto substateIterator = substates->begin(); substateIterator != substates->end(); ++substateIterator)
@@ -479,11 +815,15 @@ namespace StateMachineBlaBlaCar
                 }
             }
 
+            AssertStateExistsPostCondition(superstate.get_id());
+
             return *matches;
         }
 
         std::vector<State<T>> get_reachable_states_from_current(State<T> state)
         {
+            AssertStateExistsPreCondition(state.get_id());
+
             std::vector<State<T>> matches;
             auto i = transitions.begin(), end = transitions.end();
             while (i != end)
@@ -495,6 +835,8 @@ namespace StateMachineBlaBlaCar
                 i++;
               }
             }
+
+            AssertStateExistsPostCondition(state.get_id());
 
             return matches;
         }
@@ -522,17 +864,19 @@ namespace StateMachineBlaBlaCar
             return true;
         }
 
-        void add_state(State<T> state) throw(StateAlreadyExistsException)
+        void add_state(State<T> state) throw(StateAlreadyExistsException<T>)
         {
-            AssertStateNotExistsExc(state.get_id());
+            AssertStateNotExistsPreCondition(state.get_id());
 
             states.push_back(state);
 
-            AssertStateExists(state.get_id());
+            AssertStateExistsPostCondition(state.get_id());
         }
 
-        void add_substate(State<T> substate, int state_id)
+        void add_substate(State<T> substate, int state_id) throw (StateNotFoundException<T>)
         {
+            AssertSubstateNotExistsPreCondition(state_id, substate.get_id());
+
             auto state = std::find_if(states.begin(),
                          states.end(),
                          [&state_id](const State<T> & state){return state.get_id() == state_id;}
@@ -541,13 +885,16 @@ namespace StateMachineBlaBlaCar
             {
                 (*state).add_state(substate);
             } else {
-                //throw StateNotFoundException();
+                throw StateNotFoundException<T>(state_id);
             }
+
+            AssertSubstateExistsPostCondition(substate.get_id());
         }
 
         void delete_substate(int superstate_id, int substate_id)
         {
-            AssertStateExistsExc(superstate_id);
+            AssertStateExistsPreCondition(superstate_id);
+
             auto state = std::find_if(
                         states.begin(),
                         states.end(),
@@ -574,12 +921,13 @@ namespace StateMachineBlaBlaCar
                 transitions.end()
             );
 
-            AssertStateExistsExc(superstate_id);
-            //AssertIllegalTransitions();
+            AssertStateExistsPostCondition(superstate_id);
         }
 
         void delete_state(std::string state_name)
         {
+            AssertStateExistsPreCondition(state_name);
+
             auto state = std::find_if(
                         states.begin(),
                         states.end(),
@@ -589,11 +937,13 @@ namespace StateMachineBlaBlaCar
             {
                 delete_state((*state).get_id());
             }
+
+            AssertStateNotExistsPostCondition(state_name);
         }
 
         void delete_state(int state_id)
         {
-            AssertStateExistsExc(state_id);
+            AssertStateExistsPreCondition(state_id);
 
             states.erase(
                 std::remove_if(
@@ -613,12 +963,14 @@ namespace StateMachineBlaBlaCar
                 transitions.end()
             );
 
-            AssertStateNotExists(state_id);
-            AssertIllegalTransitions();
+            AssertStateNotExistsPostCondition(state_id);
         }
 
-        void add_passenger_to_car(int car_id, std::string login) {
-            //aseert
+        void add_passenger_to_car(int car_id, std::string login)
+        {
+            AssertCarExistsPreCondition(car_id);
+            AssertPassengerExistsPreCondition(login);
+
             auto car = std::find_if(
                         cars.begin(),
                         cars.end(),
@@ -626,7 +978,7 @@ namespace StateMachineBlaBlaCar
             );
             if (car == cars.end())
             {
-                throw CarNotFoundException(std::to_string(car_id));
+                throw CarNotFoundException(car_id);
             }
 
             Passenger * new_passenger;
@@ -646,12 +998,16 @@ namespace StateMachineBlaBlaCar
             }
 
             car->get_passengers()->push_back(*new_passenger);
-            //assert
+
+            AssertCarExistsPostCondition(car_id);
+            AssertPassengerExistsPostCondition(login);
         }
 
         void delete_passenger(int car_id, std::string login)
         {
-            //aseert
+            AssertCarExistsPreCondition(car_id);
+            AssertPassengerExistsPreCondition(login);
+
             auto car = std::find_if(
                         cars.begin(),
                         cars.end(),
@@ -659,7 +1015,7 @@ namespace StateMachineBlaBlaCar
             );
             if (car == cars.end())
             {
-                throw CarNotFoundException(std::to_string(car_id));
+                throw CarNotFoundException(car_id);
             }
 
             car->get_passengers()->erase(
@@ -671,7 +1027,8 @@ namespace StateMachineBlaBlaCar
                 car->get_passengers()->end()
             );
 
-            //assert
+            AssertCarExistsPostCondition(car_id);
+            AssertPassengerNotExistsPostCondition(login);
         }
 
         void add_passenger_login(std::string login)
@@ -681,6 +1038,9 @@ namespace StateMachineBlaBlaCar
 
         void change_car_active_state(int car_id, int active_state_id)
         {
+            AssertCarExistsPreCondition(car_id);
+            AssertStateExistsPreCondition(active_state_id);
+
             auto car = std::find_if(
                         cars.begin(),
                         cars.end(),
@@ -690,10 +1050,15 @@ namespace StateMachineBlaBlaCar
             {
                 car->set_state_id(active_state_id);
             }
+
+            AssertCarExistsPostCondition(car_id);
+            AssertStateExistsPostCondition(active_state_id);
         }
 
         Car<void> find_car_by_id(int car_id)
         {
+            AssertCarExistsPreCondition(car_id);
+
             auto car = std::find_if(
                         cars.begin(),
                         cars.end(),
@@ -701,19 +1066,27 @@ namespace StateMachineBlaBlaCar
                     );
             if (car == cars.end())
             {
-                throw CarNotFoundException(std::to_string(car_id));
+                throw CarNotFoundException(car_id);
             }
+
+            AssertCarExistsPostCondition(car_id);
 
             return *car;
         }
 
         void add_car(Car<void> car)
         {
+            AssertCarNotExistsPreCondition(car.get_id());
+
             cars.push_back(car);
+
+            AssertCarExistsPostCondition(car.get_id());
         }
 
         void delete_car(int car_id)
         {
+            AssertCarExistsPreCondition(car_id);
+
             cars.erase(
                 std::remove_if(
                     cars.begin(),
@@ -729,6 +1102,8 @@ namespace StateMachineBlaBlaCar
             {
                 carIterator->set_id(i++);
             }
+
+            AssertCarNotExistsPostCondition(car_id);
         }
 
         bool is_login_available(std::string login)
@@ -759,17 +1134,19 @@ namespace StateMachineBlaBlaCar
             return on_the_way->get_states()->front().get_id();
         }
 
-        void add_transition(Transition<T> transition) throw(StateAlreadyExistsException)
+        void add_transition(Transition<T> transition) throw(StateAlreadyExistsException<T>)
         {
-            AssertTransitionNotExistsExc(transition.get_id());
+            AssertTransitionNotExistsPreCondition(transition.get_id());
 
             transitions.push_back(transition);
 
-            AssertTransitionExists(transition.get_id());
+            AssertTransitionExistsPostCondition(transition.get_id());
         }
 
         void add_transition_for_substates(int superstate_id, int first_state_id, int second_state_id, std::string name, bool one_way)
         {
+            AssertTransitionNotExistsPreCondition(first_state_id, second_state_id);
+
             auto stateIt = std::find_if(
                         states.begin(),
                         states.end(),
@@ -788,20 +1165,24 @@ namespace StateMachineBlaBlaCar
                         substates->end(),
                         [&second_state_id](const State<T> & state) { return state.get_id() == second_state_id; }
             );
-            if (initial_state == substates->end() || final_state == substates->end())
+            if (initial_state == substates->end())
             {
-                throw StateNotFoundException("0");
+                throw SubstateNotFoundException<T>(initial_state->get_id());
+            }
+            if (final_state == substates->end())
+            {
+                throw SubstateNotFoundException<T>(final_state->get_id());
             }
             Transition<T> * transition = new Transition<T>(name, *initial_state, *final_state, one_way);
             transitions.push_back(*transition);
 
-            //add assert
+            AssertTransitionExistsPostCondition(first_state_id, second_state_id);
         }
 
         void add_transition(int first_state_id, int second_state_id, std::string name, bool one_way)
-                    throw(StateNotFoundException, TransitionAlreadyExistsException)
+                    throw(StateNotFoundException<T>, TransitionAlreadyExistsException<T>)
         {
-            AssertTransitionNotExistsExc(first_state_id, second_state_id);
+            AssertTransitionNotExistsPreCondition(first_state_id, second_state_id);
 
             bool initialStateFound = false;
             bool finalStateFound = false;
@@ -837,29 +1218,24 @@ namespace StateMachineBlaBlaCar
                 }
             }
 
-//            auto initial_state = std::find_if(
-//                        states.begin(),
-//                        states.end(),
-//                        [&first_state_id](State<T> & state) { return state.get_id() == first_state_id;}
-//            );
-//            auto final_state = std::find_if(
-//                        states.begin(),
-//                        states.end(),
-//                        [&second_state_id](const State<T> & state) { return state.get_id() == second_state_id; }
-//            );
-            if (!initialStateFound || !finalStateFound)
+
+            if (!initialStateFound)
             {
-                throw StateNotFoundException("0");
+                throw StateNotFoundException<T>(initialState.get_id());
+            }
+            if (!finalStateFound)
+            {
+                throw StateNotFoundException<T>(finalState.get_id());
             }
             Transition<T> * transition = new Transition<T>(name, initialState, finalState, one_way);
             transitions.push_back(*transition);
 
-            AssertTransitionExists(transition->get_id());
+            AssertTransitionExistsPostCondition(transition->get_id());
         }
 
         void delete_transition(int initial_state_id, int final_state_id)
         {
-            AssertTransitionExistsExc(initial_state_id, final_state_id);
+            AssertTransitionExistsPreCondition(initial_state_id, final_state_id);
 
             auto transition = std::find_if(
                         transitions.begin(),
@@ -868,7 +1244,7 @@ namespace StateMachineBlaBlaCar
             );
             if (transition == transitions.end())
             {
-                throw TransitionNotFoundException(initial_state_id + "/" + final_state_id);
+                throw TransitionNotFoundException<T>(initial_state_id, final_state_id);
             }
 
             int transition_id = (*transition).get_id();
@@ -881,12 +1257,12 @@ namespace StateMachineBlaBlaCar
                 transitions.end()
             );
 
-            AssertTransitionNotExists(initial_state_id, final_state_id);
+            AssertTransitionNotExistsPostCondition(initial_state_id, final_state_id);
         }
 
         void delete_transition(int transition_id)
         {
-            AssertTransitionExistsExc(transition_id);
+            AssertTransitionExistsPreCondition(transition_id);
 
             transitions.erase(
                 std::remove_if(
@@ -897,7 +1273,7 @@ namespace StateMachineBlaBlaCar
                 transitions.end()
             );
 
-            AssertTransitionNotExists(transition_id);
+            AssertTransitionNotExistsPostCondition(transition_id);
         }
 
         int get_id() const
@@ -1047,7 +1423,7 @@ namespace StateMachineBlaBlaCar
             return json_string.toStdString();
         }
 
-        void from_json(std::string jsonStr) throw(ParsingException)
+        void from_json(std::string jsonStr)
         {
             QString qjson_string = QString::fromStdString(jsonStr);
             QJsonDocument json_doc = QJsonDocument::fromJson(qjson_string.toUtf8());
